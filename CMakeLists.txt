@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.17.0)
 
-project(Juniorgram)
+project(Unigram)
 
 # Global settings. Should probably be moved to a separate file later.
 set (CMAKE_CXX_STANDARD 17)

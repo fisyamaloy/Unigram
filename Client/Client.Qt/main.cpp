@@ -1,4 +1,4 @@
-#include <QtCore/QCoreApplication>
+#include <QApplication>
 
 int main(int argc, char* argv[])
 {
