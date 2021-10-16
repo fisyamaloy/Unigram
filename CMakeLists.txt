@@ -39,8 +39,8 @@ find_package(Qt5 COMPONENTS Widgets Core Gui Sql REQUIRED HINTS "/opt/Qt/5.15.2/
 
 enable_testing()
 
-add_subdirectory(Client)
 add_subdirectory(DataAccess)
 add_subdirectory(Network)
 add_subdirectory(Server)
 add_subdirectory(Utility)
+add_subdirectory(CMakeProject1)
