@@ -43,6 +43,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: 'C:\Users\runneradmin\.conan'
+        token: ${{ secrets.PERSONAL_TOKEN }}
         key: ${{ runner.os }}${{matrix.BUILD_TYPE}}-conan
         restore-keys: ${{ runner.os }}${{matrix.BUILD_TYPE}}-conan
       
