@@ -6,7 +6,12 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(SOURCE_FILES 
-        main.cpp)
+        Source.cpp
+        Application.hpp
+        Application.cpp 
+        MainWidget.hpp
+        MainWidget.cpp)
+
 add_executable(${TARGET} ${SOURCE_FILES})
 
 if (WIN32)
