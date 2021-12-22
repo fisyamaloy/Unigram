@@ -55,9 +55,27 @@ int main(int argc, char** argv)
             }
             else if (cmd == "ur")
             {
-                clientApp.userRegistration("danil_fisiuk@epam.com", "tuchko321", "19967340");
+                std::cout << "Input email:" << std::endl;
+                std::string email = GetLineFromCin();
+
+                std::cout << "Input login:" << std::endl;
+                std::string login = GetLineFromCin();
+
+                std::cout << "Input password:" << std::endl;
+                std::string password = GetLineFromCin();
+
+                clientApp.userRegistration(email, login, password);
             }
-            
+            else if (cmd == "au")
+            {
+                std::cout << "Input login:" << std::endl;
+                std::string login = GetLineFromCin();
+
+                std::cout << "Input password:" << std::endl;
+                std::string password = GetLineFromCin();
+
+                clientApp.userAuthorization(login, password);
+            }
             else if (cmd == "q")
             {
                 quit = true;

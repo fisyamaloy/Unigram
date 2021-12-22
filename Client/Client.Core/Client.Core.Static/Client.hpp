@@ -34,10 +34,10 @@ protected:
     virtual void onDisconnect();
     virtual void onMessageSendFailed(const Message& message) const;
 
-    virtual void onLoginAnswer(bool success);
     virtual void onServerAccepted();
     virtual void onServerPing(double timestamp);
     virtual void onRegistrationAnswer(Utility::RegistrationCodes registrationCode);
+    virtual void onLoginAnswer(bool success);
 
 private:
     asio::io_context _context;

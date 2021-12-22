@@ -36,3 +36,8 @@ void App::onRegistrationAnswer(Utility::RegistrationCodes registrationCode)
         std::cout << "Unknown RegistrationCode" << std::endl;
     }
 }
+
+void App::onLoginAnswer(bool success)
+{
+    std::cout << (success ? "Loginning SUCCES" : "Loginning FAILED") << std::endl;
+}

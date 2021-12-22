@@ -12,4 +12,5 @@ protected:
     void onServerAccepted() override;
     void onServerPing(double timestamp) override;
     void onRegistrationAnswer(Utility::RegistrationCodes registrationCode) override;
+    void onLoginAnswer(bool success) override;
 };
