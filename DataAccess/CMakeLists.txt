@@ -1,8 +1,8 @@
 project(DataAccess LANGUAGES CXX)
 
+set(TARGET DataAccess)
+
 add_subdirectory(Public)
 add_subdirectory(DataAccess.Postgre)
-
-set(TARGET DataAccess)
 
 add_library(${TARGET} INTERFACE)

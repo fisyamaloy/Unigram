@@ -1,10 +1,11 @@
 [requires]
-asio/1.21.0
-cryptopp/8.5.0
-expat/2.2.10
-libtool/2.4.6
-libpq/11.5
-libpqxx/7.2.1
+asio/1.18.1
+cryptopp/8.6.0
+expat/2.5.0
+catch2/2.13.4
+libpq/14.5
+libpqxx/7.7.4
+nlohmann_json/3.9.1
 yas/7.0.5
 
 [generators]

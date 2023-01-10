@@ -1,18 +1,13 @@
-#include <algorithm>
-#include <array>
 #include <iostream>
-#include <map>
 #include <stdexcept>
-#include <string>
 
 #include <Server.hpp>
 
 int main()
 {
-
     try
     {
-        Server::Server server(65001);
+        Server::Server server(65003);
         server.start();
 
         while (true)

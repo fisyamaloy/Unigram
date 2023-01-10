@@ -1,9 +1,6 @@
-﻿# CMakeList.txt : Top-level CMake project file, do global configuration
-# and include sub-projects here.
-#
-cmake_minimum_required(VERSION 3.17.0)
+﻿cmake_minimum_required(VERSION 3.17.0)
 
-project(Unigram)
+project(Juniorgram)
 
 # Global settings. Should probably be moved to a separate file later.
 set (CMAKE_CXX_STANDARD 17)
@@ -42,8 +39,9 @@ find_package(Qt5 COMPONENTS Widgets Core Gui Sql REQUIRED HINTS "/opt/Qt/5.15.2/
 
 enable_testing()
 
+add_subdirectory(Base)
+add_subdirectory(Client)
 add_subdirectory(DataAccess)
 add_subdirectory(Network)
 add_subdirectory(Server)
 add_subdirectory(Utility)
-add_subdirectory(Client)
