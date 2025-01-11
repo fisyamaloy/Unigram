@@ -1,0 +1,75 @@
+name: GCC Linux Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        BUILD_TYPE: [Debug, Release]
+  
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: Python setup
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+        architecture: 'x64'
+        
+    - name: Get prerequisites
+      run: python -m pip install conan cmake
+      
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: '5.15.2'
+        host: 'linux'
+        target: 'desktop'
+        dir: '${{ github.workspace }}'
+        install-deps: 'true'
+        setup-python: 'false'
+        set-env: 'true'
+        tools-only: 'false'
+
+    - name: Cache Conan packages
+      id: conan-cache
+      uses: actions/cache@v2
+      with:
+        path: '/home/runner/.conan/'
+        key: ${{ runner.os }}${{matrix.BUILD_TYPE}}-conan
+        restore-keys: ${{ runner.os }}${{matrix.BUILD_TYPE}}-conan
+      
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}}
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.BUILD_TYPE}}
+
+    # if we have tests here runnung them
+   
+    - name: Setup SSH
+      if: matrix.BUILD_TYPE == 'Release' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+      run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/staging.key
+          chmod 600 ~/.ssh/staging.key
+          cat >>~/.ssh/config <<END
+          Host jg_host
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/staging.key
+            StrictHostKeyChecking no
+          END
+      env:
+          SSH_USER: ${{ secrets.HOST_USER }}
+          SSH_KEY: ${{ secrets.HOST_SSH_KEY }}
+          SSH_HOST: ${{ secrets.HOST_IP_ADDRESS }}
+          
+    # upload server to host- name: Upload server to Host
