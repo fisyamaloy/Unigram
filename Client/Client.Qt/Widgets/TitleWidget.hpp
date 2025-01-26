@@ -92,7 +92,7 @@ public:
 
 protected:
     /// Handle enter event
-    void enterEvent(QEvent* event) override;
+    void enterEvent(QEnterEvent* event) override;
     /// Handle leave event
     void leaveEvent(QEvent* event) override;
     /// Handle paint

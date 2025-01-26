@@ -57,7 +57,7 @@ public:
 
 protected:
     /// Handle mouse enter event
-    void enterEvent(QEvent* event) override;
+    void enterEvent(QEnterEvent* event) override;
     /// Handle mouse leave event
     void leaveEvent(QEvent* event) override;
     /// Handle mouse move event

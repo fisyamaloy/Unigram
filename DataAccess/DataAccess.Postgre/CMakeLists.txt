@@ -14,6 +14,9 @@ set(SOURCE_FILES
 
 add_library(${TARGET} STATIC ${SOURCE_FILES})
 
+find_package(libpqxx)
+find_package(PostgreSQL)
+
 target_link_libraries(${TARGET}
-        PUBLIC CONAN_PKG::libpq CONAN_PKG::libpqxx
+        PUBLIC PostgreSQL::PostgreSQL libpqxx::pqxx
         PUBLIC Utility.Public DataAccess.Public Network.Public)

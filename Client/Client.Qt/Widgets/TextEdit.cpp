@@ -38,11 +38,12 @@ TextEdit::TextEdit(QWidget* parent) : QWidget(parent), _settings(Settings::getIn
     setMinimumHeight(Style::valueDPIScale(100));
 }
 
+// TODO
 int TextEdit::expectedHeight()
 {
-    return _boldnessButton->height() + _messageInput->document()->size().height() + _mainVerticalLayout->margin() +
-           _messageInput->contentsMargins().top() + _messageInput->contentsMargins().bottom() + contentsMargins().top() +
-           contentsMargins().bottom();
+    int layoutMargin = _mainVerticalLayout->contentsMargins().top();  // Используем верхний отступ (или любой другой)
+    return _boldnessButton->height() + _messageInput->document()->size().height() + layoutMargin + _messageInput->contentsMargins().top() +
+           _messageInput->contentsMargins().bottom() + contentsMargins().top() + contentsMargins().bottom();
 }
 
 void TextEdit::sendButtonClick()

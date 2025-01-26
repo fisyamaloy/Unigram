@@ -18,7 +18,7 @@ bool isCompositionEnabled()
 }
 
 /// https://github.com/melak47/BorderlessWindow
-bool MainWidget::nativeEvent(const QByteArray& eventType, void* message, long* result)
+bool MainWidget::nativeEvent(const QByteArray& eventType, void* message, qintptr* result)
 {
     Q_UNUSED(eventType)
     MSG* msg = static_cast<MSG*>(message);
@@ -106,7 +106,7 @@ MainWidget::MainWidget() : QWidget(nullptr)
     _title = std::make_unique<TitleWidget>(this);
 
     _grid->setSpacing(0);
-    _grid->setMargin(st::shadowPadding);
+    _grid->setContentsMargins(st::shadowPadding, st::shadowPadding, st::shadowPadding, st::shadowPadding);
     setLayout(_grid.get());
     _grid->addWidget(_title.get());
     _grid->addWidget(_body.get());
@@ -160,7 +160,7 @@ bool MainWidget::eventFilter(QObject* obj, QEvent* e)
         if (obj->isWidgetType() && window()->isAncestorOf(static_cast<QWidget*>(obj)))
         {
             const auto mouseEvent   = static_cast<QMouseEvent*>(e);
-            const auto currentPoint = mouseEvent->windowPos().toPoint();
+            const auto currentPoint = mouseEvent->scenePosition().toPoint();
             const auto edges        = edgesFromPos(currentPoint);
 
             if (e->type() == QEvent::MouseMove && mouseEvent->buttons() == Qt::NoButton)

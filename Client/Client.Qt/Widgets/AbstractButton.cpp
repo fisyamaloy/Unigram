@@ -11,7 +11,7 @@ void AbstractButton::leaveEvent(QEvent* event)
     setOver(false, StateChanger::ByHover);
 }
 
-void AbstractButton::enterEvent(QEvent* event)
+void AbstractButton::enterEvent(QEnterEvent* event)
 {
     Q_UNUSED(event)
     setOver(true, StateChanger::ByHover);

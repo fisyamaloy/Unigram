@@ -6,7 +6,7 @@
 #include <QTimer>
 #include <QtCore>
 #include <algorithm>
-#include <asio/connect.hpp>
+#include <boost/asio/connect.hpp>
 #include <cmath>
 
 LoadingSpinner::LoadingSpinner(QWidget* parent, bool disableParentWhenSpinning, const Style::LoadingSpinner& st)
