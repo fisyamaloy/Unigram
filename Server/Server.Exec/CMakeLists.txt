@@ -10,7 +10,7 @@ endif()
 
 add_executable(${TARGET} ${SOURCE_FILES})
 
-find_package(Boost REQUIRED COMPONENTS asio)
+find_package(Boost CONFIG REQUIRED COMPONENTS asio)
 
 #find_path(YAS_INCLUDE_DIRS "yas/abseil_types.hpp")
 target_link_libraries(${TARGET} PRIVATE ${EXTRA_LIBS} Boost::asio)

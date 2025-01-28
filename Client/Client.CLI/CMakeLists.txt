@@ -7,7 +7,7 @@ set(SOURCE_FILES
  
 add_executable(${TARGET} ${SOURCE_FILES})
 
-find_package(Boost REQUIRED COMPONENTS asio)
+find_package(Boost CONFIG REQUIRED COMPONENTS asio)
 
 target_link_libraries(${TARGET} PUBLIC Network.Public Utility.Public)
 target_link_libraries(${TARGET} PUBLIC Client.Core.Static)

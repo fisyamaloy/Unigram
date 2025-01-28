@@ -16,7 +16,7 @@ target_include_directories(${TARGET}
 
 #find_path(YAS_INCLUDE_DIRS "yas/abseil_types.hpp")
 
-find_package(Boost REQUIRED COMPONENTS asio)
+find_package(Boost CONFIG REQUIRED COMPONENTS asio)
 target_link_libraries(${TARGET}
         PRIVATE ${EXTRA_LIBS} Boost::asio 
         PUBLIC Network.Public Crypto.Static)

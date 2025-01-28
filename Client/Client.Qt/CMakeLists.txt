@@ -117,7 +117,7 @@ add_executable(${TARGET} ${SOURCE_FILES} ${STYLE_SOURCES} ${UI_WIDGETS_SOURCES} 
         resources/resources.qrc)
 
 find_package(Qt6 COMPONENTS Widgets REQUIRED)
-find_package(Boost REQUIRED COMPONENTS asio)
+find_package(Boost CONFIG REQUIRED COMPONENTS asio)
 
 target_link_libraries(${TARGET}
         PRIVATE Qt6::Widgets Qt::Gui ${EXTRA_LIBS} Boost::asio

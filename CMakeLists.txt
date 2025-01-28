@@ -1,12 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.30.0)
-
-if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    set(CMAKE_TOOLCHAIN_FILE "c:/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Path to vcpkg toolchain file")
-endif()
-
-if(NOT DEFINED VCPKG_TARGET_TRIPLET)
-    set(VCPKG_TARGET_TRIPLET "x64-windows" CACHE STRING "Vcpkg target triplet")
-endif()
+﻿cmake_minimum_required(VERSION 3.29.0)
 
 project(Unigram)
 

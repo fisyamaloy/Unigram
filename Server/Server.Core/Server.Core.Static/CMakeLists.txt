@@ -16,7 +16,7 @@ target_include_directories(${TARGET}
 target_include_directories(${TARGET} PRIVATE
     $<TARGET_PROPERTY:DataAccess.Postgre,SOURCE_DIR>/..)
 
-find_package(Boost REQUIRED COMPONENTS asio)
+find_package(Boost CONFIG REQUIRED COMPONENTS asio)
 find_package(PostgreSQL)
 
 #find_path(YAS_INCLUDE_DIRS "yas/abseil_types.hpp")
