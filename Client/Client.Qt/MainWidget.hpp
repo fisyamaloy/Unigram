@@ -48,7 +48,7 @@ public:
 
 protected:
 #ifdef _WIN32
-    bool nativeEvent(const QByteArray& eventType, void* message, long* result) override;
+    bool nativeEvent(const QByteArray& eventType, void* message, qintptr* result) override;
 #endif
     /// Handle paint
     void paintEvent(QPaintEvent* event) override;

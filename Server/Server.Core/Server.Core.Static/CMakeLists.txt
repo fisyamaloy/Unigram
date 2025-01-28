@@ -16,6 +16,9 @@ target_include_directories(${TARGET}
 target_include_directories(${TARGET} PRIVATE
     $<TARGET_PROPERTY:DataAccess.Postgre,SOURCE_DIR>/..)
 
+find_package(Boost CONFIG REQUIRED COMPONENTS asio)
+find_package(PostgreSQL)
 
-target_link_libraries(${TARGET} PRIVATE ${EXTRA_LIBS} CONAN_PKG::asio CONAN_PKG::yas DataAccess.Postgre)
+#find_path(YAS_INCLUDE_DIRS "yas/abseil_types.hpp")
+target_link_libraries(${TARGET} PRIVATE ${EXTRA_LIBS} Boost::asio DataAccess.Postgre)
 target_link_libraries(${TARGET} PUBLIC Network.Public DataAccess.Public Utility.Public)

@@ -80,7 +80,7 @@ int main(int argc, char** argv)
             }
             else if (cmd == "mh")
             {
-                const std::uint64_t channelID = 2;
+                const std::uint64_t channelID = 1;
                 clientApp.askForMessageHistory(channelID);
             }
             else if (cmd == "sm")

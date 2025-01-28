@@ -89,19 +89,19 @@ void TitleWidget::windowStateChanged(Qt::WindowState state)
         if (state == Qt::WindowNoState)
         {
             parentWidget()->setAttribute(Qt::WA_TranslucentBackground);
-            parentWidget()->layout()->setMargin(st::shadowPadding);
+            parentWidget()->layout()->setContentsMargins(st::shadowPadding, st::shadowPadding, st::shadowPadding, st::shadowPadding);
             _maximizeButton->setStyle(&_st.maximizeButton);
         }
         else if (state == Qt::WindowMaximized)
         {
             parentWidget()->setAttribute(Qt::WA_TranslucentBackground, false);
-            parentWidget()->layout()->setMargin(0);
+            parentWidget()->layout()->setContentsMargins(0, 0, 0, 0);
             _maximizeButton->setStyle(&_st.restoreButton);
         }
     }
 }
 
-void CaptionButton::enterEvent(QEvent* event)
+void CaptionButton::enterEvent(QEnterEvent* event)
 {
     _fadeinAnim->setDirection(QAbstractAnimation::Forward);
     _fadeinAnim->start();

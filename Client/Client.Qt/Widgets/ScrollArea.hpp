@@ -51,7 +51,7 @@ protected:
     /// Handle paint
     void paintEvent(QPaintEvent* e) override;
     /// Handle mouse enter event
-    void enterEvent(QEvent* e) override;
+    void enterEvent(QEnterEvent* e) override;
     /// Handle mouse leave event
     void leaveEvent(QEvent* e) override;
     /// Handle mouse move event
@@ -91,7 +91,7 @@ private:
     bool _overBar  = false;
     bool _moving   = false;
 
-    QPoint      _dragStart;
+    QPointF     _dragStart;
     QScrollBar* _connected;
 
     int32_t _startFrom = 0, _scrollMax = 0;
@@ -190,7 +190,7 @@ protected:
     void moveEvent(QMoveEvent* e) override;
 
     /// Handle mouse enter event
-    void enterEvent(QEvent* e) override;
+    bool event(QEvent* e) override;
     /// Handle mouse leave event
     void leaveEvent(QEvent* e) override;
     /// Handle key press event

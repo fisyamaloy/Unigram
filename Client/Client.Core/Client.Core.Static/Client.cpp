@@ -36,7 +36,7 @@ bool Client::connectToServer(const std::string_view& host, const uint16_t port)
         /// Auto = asio::ip::tcp::resolver::results_type
         auto endpoints = resolver.resolve(host, std::to_string(port));
         _connection->connectToServer(endpoints);
-        _contextThread = std::thread([=]() {
+        _contextThread = std::thread([this]() {
             while (_context.run_one())
             {
                 loop();

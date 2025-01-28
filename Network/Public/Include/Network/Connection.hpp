@@ -9,7 +9,7 @@
 
 #define _WIN32_WINNT 0x0601
 
-#include <asio.hpp>
+#include <boost/asio.hpp>
 #include <chrono>
 #include <functional>
 #include <iostream>
@@ -23,6 +23,8 @@
 #include "Utility/Utility.hpp"
 #include "Utility/WarningSuppression.hpp"
 #include "YasSerializer.hpp"
+
+using namespace boost;
 
 namespace Network
 {

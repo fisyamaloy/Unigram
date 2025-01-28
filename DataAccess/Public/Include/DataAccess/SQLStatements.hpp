@@ -223,7 +223,7 @@ public:
         {
             if (_currentBuilder.getAdapter()->isConnected())
             {
-                std::optional<std::any> result = _currentBuilder.getAdapter()->query(SQLBase<ResultType>::_queryStream.str());
+                std::optional<std::any> result = _currentBuilder.getAdapter()->query(this->_queryStream.str());
 
                 if (result.has_value())
                 {
@@ -264,16 +264,16 @@ public:
 protected:
     void privateCheckForLastSymbol(void)
     {
-        if (*(SQLBase<ResultType>::_queryStream.str().end() - 1) != ' ') SQLBase<ResultType>::_queryStream << " ";
+        if (*(this->_queryStream.str().end() - 1) != ' ') this->_queryStream << " ";
     }
 
     void privateCorrectFormating(void)
     {
-        std::string queryBuffer = SQLBase<ResultType>::_queryStream.str();
+        std::string queryBuffer = this->_queryStream.str();
         queryBuffer.erase(queryBuffer.end() - 2, queryBuffer.end());
 
-        SQLBase<ResultType>::_queryStream.str(queryBuffer);
-        SQLBase<ResultType>::_queryStream.seekp(0, std::ios_base::end);
+        this->_queryStream.str(queryBuffer);
+        this->_queryStream.seekp(0, std::ios_base::end);
     }
 };
 
@@ -323,10 +323,10 @@ public:
     {
         for (auto& column : columnList)
         {
-            SQLBase<ResultType>::_queryStream << column;
-            SQLBase<ResultType>::_queryStream << (column != *(columnList.end() - 1) ? ", " : "");
+            this->_queryStream << column;
+            this->_queryStream << (column != *(columnList.end() - 1) ? ", " : "");
         }
-        SQLBase<ResultType>::_queryStream << " from " << SQLBase<ResultType>::_currentBuilder.getCurrentTableName();
+        this->_queryStream << " from " << SQLBase<ResultType>::_currentBuilder.getCurrentTableName();
 
         return this;
     }
@@ -344,7 +344,7 @@ public:
     {
         SQLBase<ResultType>::privateCheckForLastSymbol();
 
-        SQLBase<ResultType>::_queryStream << "limit " << limit << " offset " << offset;
+        this->_queryStream << "limit " << limit << " offset " << offset;
 
         return this;
     }
@@ -363,14 +363,14 @@ public:
     {
         SQLBase<ResultType>::privateCheckForLastSymbol();
 
-        SQLBase<ResultType>::_queryStream << "order by ";
+        this->_queryStream << "order by ";
         for (auto& column : columnList)
         {
-            SQLBase<ResultType>::_queryStream << column;
-            SQLBase<ResultType>::_queryStream << (column != *(columnList.end() - 1) ? ", " : "");
+            this->_queryStream << column;
+            this->_queryStream << (column != *(columnList.end() - 1) ? ", " : "");
         }
 
-        if (desc) SQLBase<ResultType>::_queryStream << " desc";
+        if (desc) this->_queryStream << " desc";
 
         return this;
     }
@@ -381,7 +381,7 @@ public:
      */
     SQLSelect* distinct(void)
     {
-        SQLBase<ResultType>::_queryStream << "distinct ";
+        this->_queryStream << "distinct ";
 
         return this;
     }
@@ -400,22 +400,22 @@ public:
         {
             case Utility::SQLJoinType::J_INNER:
             {
-                SQLBase<ResultType>::_queryStream << "inner join " << secondTableName;
+                this->_queryStream << "inner join " << secondTableName;
             }
             break;
             case Utility::SQLJoinType::J_LEFT:
             {
-                SQLBase<ResultType>::_queryStream << "left join " << secondTableName;
+                this->_queryStream << "left join " << secondTableName;
             }
             break;
             case Utility::SQLJoinType::J_RIGHT:
             {
-                SQLBase<ResultType>::_queryStream << "right join " << secondTableName;
+                this->_queryStream << "right join " << secondTableName;
             }
             break;
             case Utility::SQLJoinType::J_FULL:
             {
-                SQLBase<ResultType>::_queryStream << "full join " << secondTableName;
+                this->_queryStream << "full join " << secondTableName;
             }
             break;
             default:
@@ -425,7 +425,7 @@ public:
             break;
         }
 
-        SQLBase<ResultType>::_queryStream << " on " << onCondition;
+        this->_queryStream << " on " << onCondition;
 
         return this;
     }
@@ -440,12 +440,12 @@ public:
     {
         SQLBase<ResultType>::privateCheckForLastSymbol();
 
-        SQLBase<ResultType>::_queryStream << "group by ";
+        this->_queryStream << "group by ";
 
         for (auto& column : columnList)
         {
-            SQLBase<ResultType>::_queryStream << column;
-            SQLBase<ResultType>::_queryStream << (column != *(columnList.end() - 1) ? ", " : "");
+            this->_queryStream << column;
+            this->_queryStream << (column != *(columnList.end() - 1) ? ", " : "");
         }
 
         return this;
@@ -467,7 +467,7 @@ public:
     {
         SQLBase<ResultType>::privateCheckForLastSymbol();
 
-        SQLBase<ResultType>::_queryStream << "having " << condition;
+        this->_queryStream << "having " << condition;
 
         return this;
     }
@@ -483,7 +483,7 @@ public:
     {
         SQLBase<ResultType>::privateCheckForLastSymbol();
 
-        SQLBase<ResultType>::_queryStream << "any (" << subQuery << ")";
+        this->_queryStream << "any (" << subQuery << ")";
 
         return this;
     }
@@ -497,7 +497,7 @@ public:
     {
         SQLBase<ResultType>::privateCheckForLastSymbol();
 
-        SQLBase<ResultType>::_queryStream << "all (" << subQuery << ")";
+        this->_queryStream << "all (" << subQuery << ")";
 
         return this;
     }
@@ -538,20 +538,20 @@ public:
     template <typename... DataType>
     SQLInsert* field(const DataType&... data)
     {
-        if (SQLBase<ResultType>::_queryStream.str().find("values") == std::string::npos)
+        if (this->_queryStream.str().find("values") == std::string::npos)
         {
-            SQLBase<ResultType>::_queryStream << " values(";
+            this->_queryStream << " values(";
         }
         else
         {
-            SQLBase<ResultType>::_queryStream << ", (";
+            this->_queryStream << ", (";
         }
 
-        ((SQLBase<ResultType>::_queryStream << Utility::CheckForSQLSingleQuotesProblem(data) << ", "), ...);
+        ((this->_queryStream << Utility::CheckForSQLSingleQuotesProblem(data) << ", "), ...);
 
         this->SQLBase<ResultType>::privateCorrectFormating();
 
-        SQLBase<ResultType>::_queryStream << ")";
+        this->_queryStream << ")";
 
         return this;
     }
@@ -567,24 +567,24 @@ public:
     template <typename... DataType>
     SQLInsert* field(const std::tuple<DataType...>& dataList)
     {
-        if (SQLBase<ResultType>::_queryStream.str().find("values") == std::string::npos)
+        if (this->_queryStream.str().find("values") == std::string::npos)
         {
-            SQLBase<ResultType>::_queryStream << " values(";
+            this->_queryStream << " values(";
         }
         else
         {
-            SQLBase<ResultType>::_queryStream << ", (";
+            this->_queryStream << ", (";
         }
 
         std::apply(
             [this](const auto&... tupleArgs) {
-                ((SQLBase<ResultType>::_queryStream << Utility::CheckForSQLSingleQuotesProblem(tupleArgs) << ", "), ...);
+                ((this->_queryStream << Utility::CheckForSQLSingleQuotesProblem(tupleArgs) << ", "), ...);
             },
             dataList);
 
         this->SQLBase<ResultType>::privateCorrectFormating();
 
-        SQLBase<ResultType>::_queryStream << ")";
+        this->_queryStream << ")";
 
         return this;
     }
@@ -602,19 +602,19 @@ public:
     template <typename ColumnType = const char*, typename... DataType>
     SQLInsert* columns(const std::pair<ColumnType, DataType>&... columnData)
     {
-        SQLBase<ResultType>::_queryStream << "(";
-        ((SQLBase<ResultType>::_queryStream << columnData.first << ", "), ...);
+        this->_queryStream << "(";
+        ((this->_queryStream << columnData.first << ", "), ...);
 
         this->SQLBase<ResultType>::privateCorrectFormating();
 
-        SQLBase<ResultType>::_queryStream << ")";
+        this->_queryStream << ")";
 
-        SQLBase<ResultType>::_queryStream << " values(";
-        ((SQLBase<ResultType>::_queryStream << Utility::CheckForSQLSingleQuotesProblem(columnData.second) << ", "), ...);
+        this->_queryStream << " values(";
+        ((this->_queryStream << Utility::CheckForSQLSingleQuotesProblem(columnData.second) << ", "), ...);
 
         this->SQLBase<ResultType>::privateCorrectFormating();
 
-        SQLBase<ResultType>::_queryStream << ")";
+        this->_queryStream << ")";
 
         return this;
     }
@@ -631,24 +631,24 @@ public:
     template <typename ColumnType = const char*, typename... DataType>
     SQLInsert* columns(const std::tuple<std::pair<ColumnType, DataType>...>& columnDataList)
     {
-        SQLBase<ResultType>::_queryStream << "(";
-        std::apply([this](const auto&... tupleArgs) { ((SQLBase<ResultType>::_queryStream << tupleArgs.first << ", "), ...); },
+        this->_queryStream << "(";
+        std::apply([this](const auto&... tupleArgs) { ((this->_queryStream << tupleArgs.first << ", "), ...); },
                    columnDataList);
 
         this->SQLBase<ResultType>::privateCorrectFormating();
 
-        SQLBase<ResultType>::_queryStream << ")";
+        this->_queryStream << ")";
 
-        SQLBase<ResultType>::_queryStream << " values(";
+        this->_queryStream << " values(";
         std::apply(
             [this](const auto&... tupleArgs) {
-                ((SQLBase<ResultType>::_queryStream << Utility::CheckForSQLSingleQuotesProblem(tupleArgs.second) << ", "), ...);
+                ((this->_queryStream << Utility::CheckForSQLSingleQuotesProblem(tupleArgs.second) << ", "), ...);
             },
             columnDataList);
 
         this->SQLBase<ResultType>::privateCorrectFormating();
 
-        SQLBase<ResultType>::_queryStream << ")";
+        this->_queryStream << ")";
 
         return this;
     }
@@ -663,11 +663,11 @@ public:
     {
         SQLBase<ResultType>::privateCheckForLastSymbol();
 
-        SQLBase<ResultType>::_queryStream << "returning ";
+        this->_queryStream << "returning ";
         for (auto& column : columnList)
         {
-            SQLBase<ResultType>::_queryStream << column;
-            SQLBase<ResultType>::_queryStream << (column != *(columnList.end() - 1) ? ", " : "");
+            this->_queryStream << column;
+            this->_queryStream << (column != *(columnList.end() - 1) ? ", " : "");
         }
 
         return this;
@@ -709,9 +709,9 @@ public:
     template <typename ColumnType = const char*, typename... Args>
     SQLUpdate* fields(const std::pair<ColumnType, Args>&... columnData)
     {
-        SQLBase<ResultType>::_queryStream << " set ";
+        this->_queryStream << " set ";
 
-        ((SQLBase<ResultType>::_queryStream << columnData.first << " = " << Utility::CheckForSQLSingleQuotesProblem(columnData.second)
+        ((this->_queryStream << columnData.first << " = " << Utility::CheckForSQLSingleQuotesProblem(columnData.second)
                                             << ", "),
          ...);
 
@@ -727,11 +727,11 @@ public:
     template <typename ColumnType = const char*, typename... Args>
     SQLUpdate* fields(const std::tuple<std::pair<ColumnType, Args>...>& columnData)
     {
-        SQLBase<ResultType>::_queryStream << " set ";
+        this->_queryStream << " set ";
 
         std::apply(
             [this](const auto&... tupleArg) {
-                ((SQLBase<ResultType>::_queryStream << tupleArg.first << " = " << Utility::CheckForSQLSingleQuotesProblem(tupleArg.second)
+                ((this->_queryStream << tupleArg.first << " = " << Utility::CheckForSQLSingleQuotesProblem(tupleArg.second)
                                                     << ", "),
                  ...);
             },
