@@ -107,38 +107,42 @@ set(SOURCE_FILES
         SettingsWidget.cpp
         SettingsWidget.hpp)
 
-add_executable(${TARGET} ${SOURCE_FILES} ${STYLE_SOURCES} ${UI_WIDGETS_SOURCES} ${PAGES_SOURCES}
-        resources/resources.qrc)
-
 if (WIN32)
     list(APPEND EXTRA_LIBS ws2_32 wsock32 winmm dwmapi)
 elseif (UNIX AND NOT APPLE)
     list(APPEND EXTRA_LIBS xcb)
 endif ()
 
+add_executable(${TARGET} ${SOURCE_FILES} ${STYLE_SOURCES} ${UI_WIDGETS_SOURCES} ${PAGES_SOURCES}
+        resources/resources.qrc)
+
+find_package(Qt6 COMPONENTS Widgets REQUIRED)
+find_package(Boost CONFIG REQUIRED COMPONENTS asio)
+
 target_link_libraries(${TARGET}
-        PRIVATE Qt::Widgets Qt::Gui ${EXTRA_LIBS} CONAN_PKG::asio
+        PRIVATE Qt6::Widgets Qt::Gui ${EXTRA_LIBS} Boost::asio
         PUBLIC Network.Public Client.Core.Static Utility.Public)
 
+target_precompile_headers(${TARGET} INTERFACE QtWidgets.h)
 
 # This needs to be an install or after install operation
 # At this point it disrupts CI build so I commented it out =)
 
 #if (WIN32)
-#   set(Qt5_DIR $ENV{CMAKE_PREFIX_PATH})
-#    message(STATUS ${Qt5_DIR})
+#   set(Qt6_DIR $ENV{CMAKE_PREFIX_PATH})
+#    message(STATUS ${6})
 #    if (CMAKE_BUILD_TYPE MATCHES Debug)
-#        file(COPY "${Qt5_DIR}/bin/Qt5Cored.dll" "${Qt5_DIR}/bin/Qt5Guid.dll"
-#                "${Qt5_DIR}/bin/Qt5Widgetsd.dll" "${Qt5_DIR}/bin/Qt5Sqld.dll"
-#                "${Qt5_DIR}/plugins/platforms/qminimald.dll" "${Qt5_DIR}/plugins/platforms/qoffscreend.dll"
-#                "${Qt5_DIR}/plugins/platforms/qwindowsd.dll"
+#        file(COPY "${6}/bin/Qt6Cored.dll" "${6}/bin/Qt6Guid.dll"
+#                "${6}/bin/Qt6Widgetsd.dll" "${6}/bin/Qt6Sqld.dll"
+#                "${6}/plugins/platforms/qminimald.dll" "${6}/plugins/platforms/qoffscreend.dll"
+#                "${6}/plugins/platforms/qwindowsd.dll"
 #                DESTINATION "${CMAKE_BINARY_DIR}/bin")
 #        message("Install Debug .dll's")
 #    elseif (CMAKE_BUILD_TYPE MATCHES Release)
-#        file(COPY "${Qt5_DIR}/bin/Qt5Core.dll" "${Qt5_DIR}/bin/Qt5Gui.dll"
-#                "${Qt5_DIR}/bin/Qt5Widgets.dll" "${Qt5_DIR}/bin/Qt5Sqld.dll"
-#                "${Qt5_DIR}/plugins/platforms/qminimal.dll" "${Qt5_DIR}/plugins/platforms/qoffscreen.dll"
-#                "${Qt5_DIR}/plugins/platforms/qwindows.dll"
+#        file(COPY "${6}/bin/Qt6Core.dll" "${6}/bin/Qt6Gui.dll"
+#                "${6}/bin/Qt6Widgets.dll" "${6}/bin/Qt6Sqld.dll"
+#                "${6}/plugins/platforms/qminimal.dll" "${6}/plugins/platforms/qoffscreen.dll"
+#                "${6}/plugins/platforms/qwindows.dll"
 #                DESTINATION "${CMAKE_BINARY_DIR}/bin")
 #        message("Install Release .dll's")
 #    endif ()

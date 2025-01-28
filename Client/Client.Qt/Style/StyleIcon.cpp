@@ -22,7 +22,8 @@ IconData::IconData(const QString& filename, IconType type, const QColor& activeT
         fakeImage.setDevicePixelRatio(devicePixelRatio());
         fakeImage.fill(Qt::transparent);
         QPainter p(&fakeImage);
-        p.setClipRegion(QRegion(alpha));
+        QRegion region(QRect(0,0, alpha.width(), alpha.height()));
+        p.setClipRegion(region);
         p.setPen(Qt::NoPen);
         p.setBrush(activeTextFg);
         p.drawRect(_image.rect());

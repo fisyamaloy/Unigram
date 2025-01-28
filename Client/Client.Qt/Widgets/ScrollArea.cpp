@@ -208,7 +208,7 @@ void ScrollBar::setMoving(bool moving)
     }
 }
 
-void ScrollBar::enterEvent(QEvent*)
+void ScrollBar::enterEvent(QEnterEvent*)
 {
     _hideTimer.stop();
     setMouseTracking(true);
@@ -237,7 +237,7 @@ void ScrollBar::mouseMoveEvent(QMouseEvent* e)
         int delta = 0, barDelta = _vertical ? (area()->height() - _bar.height()) : (area()->width() - _bar.width());
         if (barDelta > 0)
         {
-            QPoint d = (e->globalPos() - _dragStart);
+            QPointF d = (e->globalPosition() - _dragStart);
             delta =
                 int32_t((_vertical ? (d.y() * int64_t(area()->scrollTopMax())) : (d.x() * int64_t(area()->scrollLeftMax()))) / barDelta);
         }
@@ -249,7 +249,7 @@ void ScrollBar::mousePressEvent(QMouseEvent* e)
 {
     if (!width() || !height()) return;
 
-    _dragStart = e->globalPos();
+    _dragStart = e->globalPosition();
     setMoving(true);
     if (_overBar)
     {
@@ -403,15 +403,21 @@ void ScrollArea::keyPressEvent(QKeyEvent* e)
     }
 }
 
-void ScrollArea::enterEvent(QEvent* e)
+bool ScrollArea::event(QEvent* e)
 {
-    if (_disabled) return;
-    if (_st.hiding)
+    if (e->type() == QEvent::Enter)
     {
-        _horizontalBar.hideTimeout(_st.hiding);
-        _verticalBar.hideTimeout(_st.hiding);
+        if (_disabled) return true;
+        if (_st.hiding)
+        {
+            _horizontalBar.hideTimeout(_st.hiding);
+            _verticalBar.hideTimeout(_st.hiding);
+        }
+        return true;
     }
-    return QScrollArea::enterEvent(e);
+
+    // Для всех остальных событий вызываем базовую реализацию.
+    return QScrollArea::event(e);
 }
 
 void ScrollArea::leaveEvent(QEvent* e)

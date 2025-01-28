@@ -123,9 +123,9 @@ void Menu::clearActions()
     }
 }
 
-void Menu::mousePressEvent(QMouseEvent* e) { handleMousePress(e->globalPos()); }
+void Menu::mousePressEvent(QMouseEvent* e) { handleMousePress(e->globalPosition().toPoint()); }
 
-void Menu::mouseReleaseEvent(QMouseEvent* e) { handleMouseRelease(e->globalPos()); }
+void Menu::mouseReleaseEvent(QMouseEvent* e) { handleMouseRelease(e->globalPosition().toPoint()); }
 
 void Menu::handleMousePress(QPoint globalPosition)
 {
@@ -143,7 +143,7 @@ void Menu::handleMouseRelease(QPoint globalPosition)
         _mouseReleaseDelegate(globalPosition);
     }
 }
-void Menu::mouseMoveEvent(QMouseEvent* event) { handleMouseMove(event->globalPos()); }
+void Menu::mouseMoveEvent(QMouseEvent* event) { handleMouseMove(event->globalPosition().toPoint()); }
 
 void Menu::handleMouseMove(QPoint globalPosition)
 {

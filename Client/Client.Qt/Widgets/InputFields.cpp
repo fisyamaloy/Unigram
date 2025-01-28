@@ -83,6 +83,8 @@ FlatInput::FlatInput(QWidget* parent, const QString& placeholder, bool password)
     setMinimumHeight(fontMetrics().height() + st::defaultMargin * 2);
     setPlaceholderText(placeholder);
     setEchoMode(password ? Password : Normal);
+
+    setStyleSheet("QLineEdit { color: white; } QLineEdit::placeholder { color: white; }");
 }
 
 QRect FlatInput::getTextRect() const { return rect().marginsRemoved(st::defaultMargins + QMargins(-2, -1, -2, -1)); }
