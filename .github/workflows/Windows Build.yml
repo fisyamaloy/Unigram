@@ -13,11 +13,29 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Clone vcpkg
-        run: git clone https://github.com/microsoft/vcpkg.git "${{ runner.workspace }}/vcpkg"
-        
+      - name: Cache vcpkg and installed libraries
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ runner.workspace }}/vcpkg
+            ${{ runner.workspace }}/vcpkg_installed
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-
+
+      - name: Clone vcpkg (if not cached)
+        run: |
+          if (-not (Test-Path "${{ runner.workspace }}/vcpkg")) {
+            git clone https://github.com/microsoft/vcpkg.git "${{ runner.workspace }}/vcpkg"
+          }
+
+      - name: Bootstrap vcpkg
+        run: |
+          cd "${{ runner.workspace }}/vcpkg"
+          .\bootstrap-vcpkg.bat
+
       - name: Python setup
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.x'
           architecture: 'x64'
@@ -55,3 +73,4 @@ jobs:
 
       - name: Build Project
         run: cmake --build build --config Release
+        
