@@ -52,3 +52,52 @@ jobs:
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.BUILD_TYPE}}
       
+
+name: Windows Build
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: '${{ runner.workspace }}/vcpkg'
+          vcpkgGitCommitId: 'latest'
+          vcpkgJsonGlob: '**/vcpkg.json'
+
+      - name: Install Qt6
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.5.3'
+          host: 'windows'
+          arch: 'win64_msvc2019_64'
+          modules: 'qtbase'
+          target: 'desktop'
+          dir: '${{ github.workspace }}'
+          install-deps: 'true'
+          setup-python: 'false'
+          set-env: 'true'
+          tools-only: 'false'
+
+      - name: Configure CMake
+        run: >
+          cmake -S . -B build
+          -G "Ninja"
+          -DCMAKE_TOOLCHAIN_FILE=${{ runner.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_CXX_COMPILER="cl.exe"
+
+      - name: Build Project
+        run: cmake --build build --config Release

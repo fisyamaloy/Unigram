@@ -1,0 +1,16 @@
+{
+    "name": "Unigram",
+    "version": "1.0.0",
+    "dependencies": [
+        "boost",
+        "cryptopp",
+        "expat",
+        "catch2",
+        "libtool",
+        "libpq",
+        "libpqxx",
+        "nlohmann-json",
+        "yas"
+    ],
+    "builtin-baseline": "latest"
+}
