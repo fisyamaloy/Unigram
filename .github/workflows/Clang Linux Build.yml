@@ -17,7 +17,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y clang-12 cmake ninja-build curl zip unzip tar pkg-config clang-tidy libgl-dev
+          sudo apt install -y clang cmake ninja-build curl zip unzip tar pkg-config clang-tidy libgl-dev
 
       - name: Cache vcpkg and installed libraries
         uses: actions/cache@v3
