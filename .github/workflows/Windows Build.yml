@@ -13,11 +13,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Clone vcpkg
+        run: git clone https://github.com/microsoft/vcpkg.git "${{ runner.workspace }}/vcpkg"
+
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgDirectory: '${{ runner.workspace }}/vcpkg'
-          vcpkgGitCommitId: 'latest'
           vcpkgJsonGlob: '**/vcpkg.json'
 
       - name: Install Qt6
