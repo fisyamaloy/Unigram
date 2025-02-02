@@ -39,4 +39,6 @@ protected:
     void onMessageHistoryAnswer(const std::vector<Network::MessageInfo>& messages) override;
     /// Registration answer handler
     void onRegistrationAnswer(Utility::RegistrationCodes registrationCode) override;
+    /// Sending file answer handler
+    void onFileSendAnswer(Utility::FileSendCodes fileSendCode) override;
 };

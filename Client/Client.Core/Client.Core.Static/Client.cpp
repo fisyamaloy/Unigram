@@ -1,9 +1,8 @@
 #include "Client.hpp"
 
-#include <limits>
-
 #include <Crypto.Static/Cryptography.hpp>
 #include <Network/Primitives.hpp>
+#include <limits>
 
 #include "ServerInfo.hpp"
 
@@ -274,12 +273,19 @@ void Client::userMessageReaction(const std::uint64_t messageID, const std::uint3
 
     // using max uint32_t as special value
     mi.reactions[reactionID] = std::numeric_limits<std::uint32_t>::max();
-    
+
     Network::Message message;
     message.mHeader.mMessageType = MessageType::MessageReactionRequest;
     message.mBody                = std::make_any<Network::MessageInfo>(mi);
 
     send(message);
+}
+
+void Client::fileSend(const std::string& filePath, const std::uint64_t channelID) const 
+{
+    //Network::Message message;
+    //message.mHeader.mMessageType = MessageType::MessageReactionRequest;
+    //message.mBody                = std::make_any<Network::MessageInfo>(mi);
 }
 
 void Client::loop()
@@ -401,7 +407,7 @@ void Client::loop()
                 onChannelCreateAnswer(channelCreateCode);
             }
             break;
-            
+
             case MessageType::MessageReactionAnswer:
             {
                 auto messageInfo = std::any_cast<Utility::ReactionMessageCodes>(message.mBody);

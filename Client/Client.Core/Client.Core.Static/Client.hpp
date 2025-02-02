@@ -122,6 +122,8 @@ public:
      */
     void userMessageReaction(const std::uint64_t messageID, const std::uint32_t reactionID) const;
 
+    void fileSend(const std::string& filePath, const std::uint64_t channelID) const;
+
 protected:
     /// Disconnect handler
     virtual void onDisconnect();
@@ -164,6 +166,8 @@ protected:
     virtual void onDirectMessageCreateAnswer(Utility::DirectMessageStatus directMessageCreateAnswer);
     /// Reaction Answer handler
     virtual void onMessageReactionAnswer(Utility::ReactionMessageCodes reactionState);
+    /// File sending answer handler
+    virtual void onFileSendAnswer(Utility::FileSendCodes fileSendCode);
     
 private:
     asio::io_context _context;

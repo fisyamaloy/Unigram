@@ -133,6 +133,17 @@ enum class ReactionMessageCodes : std::uint8_t
 };
 
 /**
+ * @brief enum for tracking message's reaction status
+ * @details Utility::ReactionMessageCodes updateMessageReactions(const Network::MessageInfo& mi) /
+ *    returns one of these codes.
+ */
+enum class FileSendCodes : std::uint8_t
+{
+    SUCCESS,
+    FAILED
+};
+
+/**
  * @brief Wrapper for OS implementations of thread-safe std::localtime
  * @details std::localtime return static internal std::tm internally, so it is not thread-safe
  */
