@@ -5,7 +5,6 @@
         "cryptopp",
         "expat",
         "catch2",
-        "libtool",
         "libpq",
         "libpqxx",
         "nlohmann-json",
