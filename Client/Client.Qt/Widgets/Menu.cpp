@@ -34,7 +34,7 @@ QAction* Menu::addAction(QWidget* widget)
     item->move(0, top);
     item->show();
 
-    connect(dynamic_cast<ReactionLayout*>(widget), &ReactionLayout::clicked, [=](const CallbackData& callbackData) {
+    connect(dynamic_cast<ReactionLayout*>(widget), &ReactionLayout::clicked, [this](const CallbackData& callbackData) {
         if (_triggeredCallback)
         {
             _triggeredCallback(callbackData);
@@ -84,14 +84,14 @@ QAction* Menu::addAction(std::unique_ptr<ItemBase> widget)
 
     widget->setIndex(int32_t(_items.size()));
 
-    connect(widget.get(), &ItemBase::clicked, [=](const CallbackData& callbackData) {
+    connect(widget.get(), &ItemBase::clicked, [this](const CallbackData& callbackData) {
         if (_triggeredCallback)
         {
             _triggeredCallback(callbackData);
         }
     });
 
-    connect(widget.get(), &ItemBase::selected, [=](const CallbackData& callbackData) {
+    connect(widget.get(), &ItemBase::selected, [this](const CallbackData& callbackData) {
         if (_activatedCallback)
         {
             _activatedCallback(callbackData);

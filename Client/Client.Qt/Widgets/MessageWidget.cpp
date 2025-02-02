@@ -33,7 +33,7 @@ MessageWidget::MessageWidget(QWidget* history, QString message, uint64_t userId,
     _fmtMessageText->move(_st.radius * 2, _st.fontname->height + _st.radius * 4);
     _fmtMessageText->show();
     _menuBtn = std::make_unique<FlatButton>(this, "Menu", _st.button);
-    _menuBtn->setClickCallback([=]() {
+    _menuBtn->setClickCallback([this]() {
         auto popup = new PopupWidget();
         popup->setDeleteOnHide(true);
         auto       messageMenu   = std::make_unique<Menu>();
@@ -46,7 +46,7 @@ MessageWidget::MessageWidget(QWidget* history, QString message, uint64_t userId,
         messageMenu->addSeparator();
 
         // T\todo implement a better way to delete a message "through server"
-        messageMenu->addAction("Delete message", [=]() { onDelete(); });
+        messageMenu->addAction("Delete message", [this]() { onDelete(); });
         popup->setMenu(std::move(messageMenu));
 
         auto globalPoint = mapToGlobal(QPoint(_menuBtn->x(), _menuBtn->height()));

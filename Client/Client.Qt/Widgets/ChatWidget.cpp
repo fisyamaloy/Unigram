@@ -26,8 +26,8 @@ ChatWidget::ChatWidget(QWidget* parent) : QWidget(parent)
     connect(_chatHistory.get(), &ChatHistory::createReplySignal, this, &ChatWidget::setReply);
     connect(_textEdit.get(), &TextEdit::sendMessage, this, &ChatWidget::newMessage);
 
-    connect(_replyWidget.get(), &ReplyWidget::visibilityChanged, [=](bool) { updateLayout(); });
-    connect(_textEdit.get(), &TextEdit::textChanged, [=]() { updateLayout(); });
+    connect(_replyWidget.get(), &ReplyWidget::visibilityChanged, [this](bool) { updateLayout(); });
+    connect(_textEdit.get(), &TextEdit::textChanged, [this]() { updateLayout(); });
 
     connect(ReceiverManager::instance(), &ReceiverManager::onReplyHistoryAnswer, this, &ChatWidget::addReplies);
     connect(ReceiverManager::instance(), &ReceiverManager::onMessageHistoryAnswer, this, &ChatWidget::addMessages);

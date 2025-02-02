@@ -7,7 +7,7 @@
 
 ItemBase::ItemBase(QWidget* parent, const Style::Menu&) : AbstractButton(parent)
 {
-    setClickCallback([=]() {
+    setClickCallback([this]() {
         if (isEnabled())
         {
             action()->trigger();
@@ -98,7 +98,7 @@ MenuItem::MenuItem(QWidget* parent, const Style::Menu& st, QAction* action, cons
     resize(parent->width(), contentHeight());
     processAction();
 
-    connect(_action, &QAction::changed, [=] { processAction(); });
+    connect(_action, &QAction::changed, [this]() { processAction(); });
 }
 
 int32_t MenuItem::contentHeight() const { return _height; }
