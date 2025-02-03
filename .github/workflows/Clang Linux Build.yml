@@ -17,7 +17,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y clang cmake curl zip unzip tar pkg-config clang-tools-extra clang-tidy libgl-dev
+          sudo apt install -y clang cmake curl zip unzip tar pkg-config clang-tidy libgl-dev
           sudo apt-get install -y ninja-build autoconf automake autoconf-archive
           
       - name: Cache vcpkg and installed libraries
@@ -75,4 +75,4 @@ jobs:
       - name: Clang-tidy checks
         working-directory: ${{ runner.workspace }}/build
         continue-on-error: true
-        run: /usr/lib/llvm-10/share/clang/run-clang-tidy.py -p="" -checks=-*,clang-analyzer-*,concurrency-*,cppcoreguidelines-*,modernize-*,performance-*,portability-*,readability-*
+        run: clang-tidy --checks=-*,clang-analyzer-*,concurrency-*,cppcoreguidelines-*,modernize-*,performance-*,portability-*,readability-* -p=build
