@@ -74,5 +74,5 @@ jobs:
 
       - name: Clang-tidy checks
         continue-on-error: true
-        run: clang-tidy --checks=-*,clang-analyzer-*,concurrency-*,cppcoreguidelines-*,modernize-*,performance-*,portability-*,readability-* -p=build
-        
+        run: |
+          find . -name "*.cpp" -o -name "*.hpp" | xargs clang-tidy --checks=-*,clang-analyzer-*,concurrency-*,cppcoreguidelines-*,modernize-*,performance-*,portability-*,readability-* -p=build
