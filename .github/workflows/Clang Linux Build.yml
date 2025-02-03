@@ -75,6 +75,6 @@ jobs:
       - name: Clang-tidy checks
         continue-on-error: true
         run: |
-          find . \( -name "*.cpp" -o -name "*.hpp" \) \
-            -not -path "./vcpkg_installed/*" \
-            -not -path "./third_party/*" | xargs clang-tidy --checks=-*,clang-analyzer-*,concurrency-*,cppcoreguidelines-*,modernize-*,performance-*,portability-*,readability-* -p=build
+          find . \( -path "./vcpkg_installed" -o -path "./third_party" \) -prune -o \( -name "*.cpp" -o -name "*.hpp" \) -print \
+          xargs clang-tidy --checks=-*,clang-analyzer-*,concurrency-*,cppcoreguidelines-*,modernize-*,performance-*,portability-*,readability-* -p=build
+          
