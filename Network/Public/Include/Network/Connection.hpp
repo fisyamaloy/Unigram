@@ -30,8 +30,6 @@ namespace Network
 {
 /** @class Connection
  *  @brief Connection managment class
- *  @details see https://github.com/f1nal3/Juniorgram/wiki/Legacy-Frontend-network \
- *  for additional details
  */
 class Connection : public std::enable_shared_from_this<Connection>
 {

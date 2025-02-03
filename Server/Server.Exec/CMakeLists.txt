@@ -1,5 +1,5 @@
 set(TARGET Server.Exec)
-set(OUTPUT_NAME Juniorgram.Server.Exec)
+set(OUTPUT_NAME Unigram.Server.Exec)
 
 set(SOURCE_FILES
     MainServer.cpp)
@@ -11,6 +11,7 @@ endif()
 add_executable(${TARGET} ${SOURCE_FILES})
 
 find_package(Boost CONFIG REQUIRED COMPONENTS asio)
+find_package(PostgreSQL)
 
 #find_path(YAS_INCLUDE_DIRS "yas/abseil_types.hpp")
 target_link_libraries(${TARGET} PRIVATE ${EXTRA_LIBS} Boost::asio)

@@ -18,7 +18,8 @@ target_include_directories(${TARGET} PRIVATE
 
 find_package(Boost CONFIG REQUIRED COMPONENTS asio)
 find_package(PostgreSQL)
+find_package(OpenSSL CONFIG REQUIRED)
 
 #find_path(YAS_INCLUDE_DIRS "yas/abseil_types.hpp")
-target_link_libraries(${TARGET} PRIVATE ${EXTRA_LIBS} Boost::asio DataAccess.Postgre)
+target_link_libraries(${TARGET} PRIVATE ${EXTRA_LIBS} Boost::asio DataAccess.Postgre OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(${TARGET} PUBLIC Network.Public DataAccess.Public Utility.Public)

@@ -56,6 +56,6 @@ void PopupWidget::setMenu(std::unique_ptr<Menu> menu)
 {
     _innerMenu = std::move(menu);
     _innerMenu->setParent(this);
-    _innerMenu->setTriggeredCallback([=](const CallbackData&) { hide(); });
+    _innerMenu->setTriggeredCallback([this](const CallbackData&) { hide(); });
 }
 void PopupWidget::setDeleteOnHide(bool deleteOnHide) { _deleteOnHide = deleteOnHide; }

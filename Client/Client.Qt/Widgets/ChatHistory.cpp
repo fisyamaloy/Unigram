@@ -44,7 +44,7 @@ void ChatHistory::addReply(const Network::ReplyInfo& replyInfo)
     _replyList.insert(std::make_pair(int32_t(replyInfo.msgIdOwner), std::unique_ptr<ReplyMessageWidget>(replyMsg)));
     _replies.push_back(replyInfo);
 
-    connect(replyMsg, &ReplyMessageWidget::geometryChanged, this, [=](int diff) {
+    connect(replyMsg, &ReplyMessageWidget::geometryChanged, this, [this, history](int diff) {
         history->setMinimumHeight(history->minimumHeight() + diff);
         updateLayout(true);
     });
@@ -94,7 +94,7 @@ void ChatHistory::addMessage(const Network::MessageInfo& messageInfo)
 
     connect(msg, &MessageWidget::createReplySignal, this, &ChatHistory::createReplySignal);
 
-    connect(msg, &MessageWidget::geometryChanged, this, [=](int diff) {
+    connect(msg, &MessageWidget::geometryChanged, this, [this, history](int diff) {
         history->setMinimumHeight(history->minimumHeight() + diff);
         updateLayout(true);
     });

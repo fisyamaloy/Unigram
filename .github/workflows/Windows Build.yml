@@ -1,5 +1,4 @@
 name: Windows Build
-
 on:
   push:
     branches: [ master ]
@@ -9,46 +8,69 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    strategy:
-      matrix:
-        BUILD_TYPE: [Debug]
-    
+
     steps:
-    - name : Checkout
-      uses: actions/checkout@v2
-    
-    - name: Python setup
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-        architecture: 'x64'
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Cache vcpkg and installed libraries
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ runner.workspace }}/vcpkg
+            ${{ runner.workspace }}/vcpkg_installed
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-
+
+      - name: Clone vcpkg (if not cached)
+        run: |
+          if (-not (Test-Path "${{ runner.workspace }}/vcpkg")) {
+            git clone https://github.com/microsoft/vcpkg.git "${{ runner.workspace }}/vcpkg"
+          }
+
+      - name: Bootstrap vcpkg
+        run: |
+          cd "${{ runner.workspace }}/vcpkg"
+          .\bootstrap-vcpkg.bat
+
+      - name: Python setup
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+
+      - name: Install Qt6
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.6.0'
+          host: 'windows'
+          arch: 'win64_msvc2019_64'
+          target: 'desktop'
+          dir: '${{ github.workspace }}'
+          install-deps: 'true'
+          setup-python: 'false'
+          set-env: 'true'
+          tools-only: 'false'
+
+      - name: Get prerequisites
+        run: python -m pip install cmake
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: '${{ runner.workspace }}/vcpkg'
+          vcpkgJsonGlob: '**/vcpkg.json'
+
+      - name: Configure CMake
+        run: >
+          cmake -S . -B build
+          -G "Visual Studio 17 2022"
+          -DVCPKG_TARGET_TRIPLET=x64-windows
+          -DCMAKE_TOOLCHAIN_FILE=${{ runner.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_CXX_COMPILER="cl.exe"
+
+      - name: Build Project
+        run: cmake --build build --config Release
         
-    - name: Get prerequisites
-      run: python -m pip install cmake conan
-
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-      with:
-        version: '5.15.2'
-        host: 'windows'
-        target: 'desktop'
-        dir: '${{ github.workspace }}'
-        install-deps: 'true'
-        setup-python: 'false'
-        set-env: 'true'
-        tools-only: 'false'
-
-    - name: Cache Conan packages
-      id: conan-cache
-      uses: actions/cache@v2
-      with:
-        path: 'C:\Users\runneradmin\.conan'
-        key: ${{ runner.os }}${{matrix.BUILD_TYPE}}-conan
-        restore-keys: ${{ runner.os }}${{matrix.BUILD_TYPE}}-conan
-      
-    - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}}
-
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{matrix.BUILD_TYPE}}
-      

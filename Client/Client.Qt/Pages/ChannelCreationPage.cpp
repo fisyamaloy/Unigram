@@ -10,7 +10,7 @@ ChannelCreationPage::ChannelCreationPage(QWidget* parent) : Page(parent)
     _createButton     = std::make_unique<FlatButton>(this, "Create");
     _channelNameInput = std::make_unique<FlatInput>(this, "Channel name");
 
-    _createButton->setClickCallback([=]() {
+    _createButton->setClickCallback([this]() {
         auto enteredText = _channelNameInput->text();
         // If entered channel name length bigger than six
         if (enteredText.length() >= 6)

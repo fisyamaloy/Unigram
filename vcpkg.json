@@ -1,0 +1,16 @@
+{
+    "name": "unigram",
+    "version": "1.0.0",
+    "dependencies": [
+        "cryptopp",
+        "expat",
+        "catch2",
+        "libpq",
+        "libpqxx",
+        "nlohmann-json",
+        "yas",
+        "boost",
+        "openssl"
+    ],
+    "builtin-baseline": "0ca64b4e1c70fa6d9f53b369b8f3f0843797c20c"
+}

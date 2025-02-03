@@ -10,7 +10,7 @@ class LogoWidget;
 
 /**
  * @class RegistrationPage
- * @brief Registration page for JuniorGram
+ * @brief Registration page for Unigram
  */
 class RegistrationPage : public Page
 {

@@ -11,7 +11,7 @@ class QHBoxLayout;
 
 /**
  * @class MainWidget
- * @brief Custom window for JuniorGram
+ * @brief Custom window for Unigram
  */
 class MainWidget : public QWidget
 {

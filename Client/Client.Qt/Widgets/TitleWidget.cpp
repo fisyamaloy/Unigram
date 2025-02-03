@@ -20,20 +20,20 @@ TitleWidget::TitleWidget(QWidget* parent, const Style::TitleBar& st) : QWidget(p
 
     _maximizedState = !(window()->windowState() & Qt::WindowMaximized);
 
-    connect(window()->windowHandle(), &QWindow::windowStateChanged, this, [=](Qt::WindowState state) { windowStateChanged(state); });
+    connect(window()->windowHandle(), &QWindow::windowStateChanged, this, [this](Qt::WindowState state) { windowStateChanged(state); });
 
-    _maximizeButton->setClickCallback([=]() {
+    _maximizeButton->setClickCallback([this, parent]() {
         if (parent->isMaximized())
             window()->setWindowState(Qt::WindowNoState);
         else
             window()->setWindowState(Qt::WindowMaximized);
         _maximizeButton->clearState();
     });
-    _closeButton->setClickCallback([=]() {
+    _closeButton->setClickCallback([this, parent]() {
         parent->deleteLater();
         _closeButton->clearState();
     });
-    _minimizeButton->setClickCallback([=]() {
+    _minimizeButton->setClickCallback([this, parent]() {
         parent->showMinimized();
         _minimizeButton->clearState();
     });
@@ -178,7 +178,7 @@ BioButton::BioButton(QWidget* parent, bool) : CaptionButton(parent)
     _popup          = std::make_unique<PopupWidget>(this);
     _settingsWidget = std::make_unique<SettingsWidget>();
 
-    setClickCallback([=]() {
+    setClickCallback([this]() {
         auto globalPoint = mapToGlobal(QPoint(0, height()));
 
         // Creating menu
@@ -187,7 +187,7 @@ BioButton::BioButton(QWidget* parent, bool) : CaptionButton(parent)
         // Adding options
         menu->addAction("Username: Add format here WWWWWWWWWWWWWWWWWWWWWWWWWWW", []() {});
         menu->addSeparator();
-        menu->addAction("Settings", [=](){ _settingsWidget->show(); });
+        menu->addAction("Settings", [this](){ _settingsWidget->show(); });
         menu->addSeparator();
         menu->addAction("Quit", []() { oApp->setAppState(App::AppState::LoginForm); });
 

@@ -103,7 +103,7 @@ void ReactionLayout::remodelLayout()
                     std::make_unique<IconButton>(this, QString(""), st::reactionIconButtonInMenu);
 
                 _reactions[item.first]->setIcon(&_icons[item.first]);
-                _reactions[item.first]->setClickCallback([=]() { clicked({ nullptr, y(), 0, true });
+                _reactions[item.first]->setClickCallback([this, &item]() { clicked({ nullptr, y(), 0, true });
                                                                  emit onClick(item.first); });
             }
 
@@ -112,7 +112,7 @@ void ReactionLayout::remodelLayout()
                 _reactions[item.first] = std::make_unique<IconButton>(this, QString("%1").arg(item.second), st::reactionIconButton);
 
                 _reactions[item.first]->setIcon(&_icons[item.first]);
-                _reactions[item.first]->setClickCallback([=]() { clicked({ nullptr, y(), 0, true }); 
+                _reactions[item.first]->setClickCallback([this, &item]() { clicked({ nullptr, y(), 0, true }); 
                                                                  emit onClick(item.first); });
             }
         }

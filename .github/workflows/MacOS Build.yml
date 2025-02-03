@@ -1,4 +1,4 @@
-name: GCC Linux Build
+name: MacOS Build
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout Repository
@@ -16,9 +16,20 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          sudo apt update
-          sudo apt install -y g++ gcc cmake curl zip unzip tar pkg-config libgl-dev
-          sudo apt-get install -y ninja-build autoconf automake autoconf-archive
+          brew update
+          brew install cmake ninja pkg-config
+          brew install autoconf automake autoconf-archive libtool
+          brew install qt6
+          brew install gettext m4
+
+      - name: Force use system Python
+        run: |
+          export PYTHON_EXECUTABLE=$(which python3)
+          echo "PYTHON_EXECUTABLE=$(which python3)" >> $GITHUB_ENV
+
+      - name: Refresh shell environment
+        run: |
+          eval "$(/opt/homebrew/bin/brew shellenv)"
 
       - name: Cache vcpkg and installed libraries
         uses: actions/cache@v3
@@ -41,33 +52,24 @@ jobs:
           cd "${{ runner.workspace }}/vcpkg"
           ./bootstrap-vcpkg.sh
 
-      - name: Install Qt6
-        uses: jurplel/install-qt-action@v3
-        with:
-          version: '6.6.0'
-          host: 'linux'
-          arch: 'gcc_64'
-          target: 'desktop'
-          dir: '${{ github.workspace }}'
-          install-deps: 'true'
-          setup-python: 'false'
-          set-env: 'true'
-          tools-only: 'false'
-
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgDirectory: '${{ runner.workspace }}/vcpkg'
           vcpkgJsonGlob: '**/vcpkg.json'
+      
+      - name: Add Homebrew paths
+        run: echo "$(brew --prefix)/bin" >> $GITHUB_PATH
 
       - name: Configure CMake
         run: |
           cmake -S . -B build \
           -G Ninja \
+          -DCMAKE_MAKE_PROGRAM=$(which ninja) \
           -DCMAKE_TOOLCHAIN_FILE=${{ runner.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_CXX_COMPILER=g++ \
-          -DCMAKE_C_COMPILER=gcc
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DCMAKE_C_COMPILER=clang
 
       - name: Build Project
         run: cmake --build build --config Release
