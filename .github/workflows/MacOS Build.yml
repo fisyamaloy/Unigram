@@ -19,6 +19,7 @@ jobs:
           brew update
           brew install cmake ninja pkg-config
           brew install autoconf automake libtool
+          brew install qt6
 
       - name: Cache vcpkg and installed libraries
         uses: actions/cache@v3
@@ -40,18 +41,6 @@ jobs:
         run: |
           cd "${{ runner.workspace }}/vcpkg"
           ./bootstrap-vcpkg.sh
-
-      - name: Install Qt6
-        uses: jurplel/install-qt-action@v3
-        with:
-          version: '6.6.0'
-          host: 'mac'
-          target: 'desktop'
-          dir: '${{ github.workspace }}'
-          install-deps: 'true'
-          setup-python: 'false'
-          set-env: 'true'
-          tools-only: 'false'
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
