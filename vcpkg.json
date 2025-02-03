@@ -7,6 +7,7 @@
         "catch2",
         "libpq",
         "libpqxx",
+        "openssl",
         "nlohmann-json",
         "yas",
         "boost"
