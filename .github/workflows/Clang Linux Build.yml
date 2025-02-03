@@ -67,7 +67,8 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=${{ runner.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_CXX_COMPILER=clang++ \
-          -DCMAKE_C_COMPILER=clang
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
       - name: Build Project
         run: cmake --build build --config Release
@@ -75,5 +76,4 @@ jobs:
       - name: Clang-tidy checks
         continue-on-error: true
         run: |
-          run: |
-          find . \( -path "./vcpkg_installed" -o -path "./third_party" \) -prune -o -type f \( -name "*.cpp" -o -name "*.hpp" \) -print | xargs clang-tidy --checks=-*,clang-analyzer-*,concurrency-*,cppcoreguidelines-*,modernize-*,performance-*,portability-*,readability-* -p=build
+          find . \( -path "./vcpkg_installed" -o -path "./third_party" \) -prune -o -type f \( -name "*.cpp" -o -name "*.hpp" \) -print | xargs clang-tidy --checks=-*,clang-analyzer-*,concurrency-*,cppcoreguidelines-*,modernize-*,performance-*,portability-*,readability-* -p=build/compile_commands.json
