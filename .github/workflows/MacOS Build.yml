@@ -18,13 +18,18 @@ jobs:
         run: |
           brew update
           brew install cmake ninja pkg-config
-          brew install autoconf automake libtool
+          brew install autoconf automake autoconf-archive libtool
           brew install qt6
+          brew install gettext m4
 
       - name: Force use system Python
         run: |
           export PYTHON_EXECUTABLE=$(which python3)
           echo "PYTHON_EXECUTABLE=$(which python3)" >> $GITHUB_ENV
+
+      - name: Refresh shell environment
+        run: |
+          eval "$(/opt/homebrew/bin/brew shellenv)
 
       - name: Remove old vcpkg cache
         run: rm -rf ${{ runner.workspace }}/vcpkg_installed
