@@ -180,8 +180,6 @@ QString GetFontOverride(int32_t flags)
 
 QFont ResolveFont(uint32_t flags, int size)
 {
-    static auto Database = QFontDatabase();
-
     const auto  bold      = ((flags & FontBold) || (flags & FontSemibold));
     const auto  italic    = (flags & FontItalic);
     const auto& custom    = bold ? BoldFont : RegularFont;
@@ -194,10 +192,10 @@ QFont ResolveFont(uint32_t flags, int size)
     }
     else if (useCustom)
     {
-        const auto sizes = Database.smoothSizes(custom.family, custom.style);
-        const auto good  = sizes.isEmpty() ? Database.pointSizes(custom.family, custom.style) : sizes;
+        const auto sizes = QFontDatabase::smoothSizes(custom.family, custom.style);
+        const auto good  = sizes.isEmpty() ? QFontDatabase::pointSizes(custom.family, custom.style) : sizes;
         const auto point = good.isEmpty() ? size : good.front();
-        result           = Database.font(custom.family, custom.style, point);
+        result           = QFontDatabase::font(custom.family, custom.style, point);
     }
     else
     {
