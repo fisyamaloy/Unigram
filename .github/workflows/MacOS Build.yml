@@ -31,9 +31,6 @@ jobs:
         run: |
           eval "$(/opt/homebrew/bin/brew shellenv)"
 
-      - name: Remove old vcpkg cache
-        run: rm -rf ${{ runner.workspace }}/vcpkg_installed
-
       - name: Cache vcpkg and installed libraries
         uses: actions/cache@v3
         with:
