@@ -9,8 +9,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv) {}
 
 void Application::create()
 {
-    setOrganizationName("L&D C++ Lab");
-    setApplicationName("Juniorgram");
+    setOrganizationName("Fisya-org");
+    setApplicationName("Unigram");
 
     Style::internal::StartFonts();
     _mainWidget = std::make_unique<MainWidget>();

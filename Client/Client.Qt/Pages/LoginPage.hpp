@@ -12,7 +12,7 @@ class LinkButton;
 
 /**
  * @class LoginPage
- * @brief LoginPage page for JuniorGram
+ * @brief LoginPage page for Unigram
  */
 class LoginPage : public Page
 {

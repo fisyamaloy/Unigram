@@ -11,7 +11,7 @@
 
 /**
  * @class ChatPage
- * @brief Chat page for JuniorGram
+ * @brief Chat page for Unigram
  */
 class ChatPage : public Page
 {
