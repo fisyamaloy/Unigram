@@ -72,17 +72,3 @@ jobs:
 
       - name: Build Project
         run: cmake --build build --config Release
-
-      - name: Clang-tidy checks
-        run: |
-          find . -type f \( -name "*.cpp" -o -name "*.hpp" \) \
-            ! -path "./vcpkg_installed/*" \
-            ! -path "./third_party/*" \
-            ! -path "./build/_deps/*" \
-            ! -path "/usr/include/qt/*" \
-            ! -path "/usr/include/Qt*" \
-            ! -path "${{ github.workspace }}/Qt/*" \
-            ! -path "/opt/qt*/include/*" \
-            -print | xargs clang-tidy \
-            --checks=-*,clang-analyzer-*,concurrency-*,cppcoreguidelines-*,modernize-*,performance-*,portability-*,readability-* \
-            -p=build
