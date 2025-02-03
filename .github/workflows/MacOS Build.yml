@@ -1,0 +1,72 @@
+name: MacOS Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          brew update
+          brew install cmake ninja pkg-config
+          brew install autoconf automake libtool
+
+      - name: Cache vcpkg and installed libraries
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ runner.workspace }}/vcpkg
+            ${{ runner.workspace }}/vcpkg_installed
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-
+
+      - name: Clone vcpkg (if not cached)
+        run: |
+          if [ ! -d "${{ runner.workspace }}/vcpkg" ]; then
+            git clone https://github.com/microsoft/vcpkg.git "${{ runner.workspace }}/vcpkg"
+          fi
+
+      - name: Bootstrap vcpkg
+        run: |
+          cd "${{ runner.workspace }}/vcpkg"
+          ./bootstrap-vcpkg.sh
+
+      - name: Install Qt6
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.6.0'
+          host: 'mac'
+          target: 'desktop'
+          dir: '${{ github.workspace }}'
+          install-deps: 'true'
+          setup-python: 'false'
+          set-env: 'true'
+          tools-only: 'false'
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: '${{ runner.workspace }}/vcpkg'
+          vcpkgJsonGlob: '**/vcpkg.json'
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build \
+          -G Ninja \
+          -DCMAKE_TOOLCHAIN_FILE=${{ runner.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DCMAKE_C_COMPILER=clang
+
+      - name: Build Project
+        run: cmake --build build --config Release
