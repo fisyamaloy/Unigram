@@ -14,10 +14,9 @@ find_package(Boost CONFIG REQUIRED COMPONENTS asio)
 find_package(OpenSSL CONFIG REQUIRED)
 
 #find_path(YAS_INCLUDE_DIRS "yas/abseil_types.hpp")
-target_link_libraries(${TARGET} PRIVATE ${EXTRA_LIBS} Boost::asio)
+target_link_libraries(${TARGET} PRIVATE ${EXTRA_LIBS} Boost::asio OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(${TARGET} PUBLIC Server.Core.Static)
 target_link_libraries(${TARGET} PUBLIC Network.Public Utility.Public)
-target_link_libraries(${TARGET} PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
 install(TARGETS ${TARGET}
         CONFIGURATIONS Debug
