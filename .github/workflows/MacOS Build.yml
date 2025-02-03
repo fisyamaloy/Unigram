@@ -48,10 +48,14 @@ jobs:
           vcpkgDirectory: '${{ runner.workspace }}/vcpkg'
           vcpkgJsonGlob: '**/vcpkg.json'
 
+      - name: Check Ninja Installation
+        run: ninja --version
+
       - name: Configure CMake
         run: |
           cmake -S . -B build \
           -G Ninja \
+          -DCMAKE_MAKE_PROGRAM=$(which ninja) \
           -DCMAKE_TOOLCHAIN_FILE=${{ runner.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_CXX_COMPILER=clang++ \
