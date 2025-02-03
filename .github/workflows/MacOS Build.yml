@@ -29,7 +29,7 @@ jobs:
 
       - name: Refresh shell environment
         run: |
-          eval "$(/opt/homebrew/bin/brew shellenv)
+          eval "$(/opt/homebrew/bin/brew shellenv)"
 
       - name: Remove old vcpkg cache
         run: rm -rf ${{ runner.workspace }}/vcpkg_installed
