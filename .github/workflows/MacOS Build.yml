@@ -14,6 +14,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Install Rosetta (For x86_64 Support)
+        run: |
+          sudo softwareupdate --install-rosetta --agree-to-license || echo "Rosetta already installed"
+
       - name: Install Dependencies
         run: |
           brew update
@@ -21,6 +25,13 @@ jobs:
           brew install autoconf automake autoconf-archive libtool
           brew install qt6
           brew install gettext m4
+
+      - name: Check Installed Versions
+        run: |
+          cmake --version
+          ninja --version
+          python3 --version
+          autoconf --version
 
       - name: Force use system Python
         run: |
@@ -58,19 +69,17 @@ jobs:
           vcpkgDirectory: '${{ runner.workspace }}/vcpkg'
           vcpkgJsonGlob: '**/vcpkg.json'
 
-      - name: Check Ninja Installation
-        run: ninja --version
-      
       - name: Add Homebrew paths
         run: echo "$(brew --prefix)/bin" >> $GITHUB_PATH
 
-      - name: Configure CMake
+      - name: Configure CMake (M1/M2 Support)
         run: |
           cmake -S . -B build \
           -G Ninja \
           -DCMAKE_MAKE_PROGRAM=$(which ninja) \
           -DCMAKE_TOOLCHAIN_FILE=${{ runner.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake \
           -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \  # Universal Binary
           -DCMAKE_CXX_COMPILER=clang++ \
           -DCMAKE_C_COMPILER=clang
 
