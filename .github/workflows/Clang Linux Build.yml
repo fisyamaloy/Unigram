@@ -73,6 +73,6 @@ jobs:
         run: cmake --build build --config Release
 
       - name: Clang-tidy checks
-        working-directory: ${{runner.workspace }}/build
+        working-directory: ${{ github.workspace }}/build
         continue-on-error: true
         run: /usr/lib/llvm-10/share/clang/run-clang-tidy.py -p="" -checks=-*,clang-analyzer-*,concurrency-*,cppcoreguidelines-*,modernize-*,performance-*,portability-*,readability-*
