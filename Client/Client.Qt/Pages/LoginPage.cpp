@@ -29,7 +29,7 @@ LoginPage::LoginPage(QWidget* parent) : Page(parent)
         connectionManager->userAuthorization(login, password);
     });
 
-    _registrationButton->setClickCallback([this]() { oApp->setAppState(App::AppState::RegistrationForm); });
+    _registrationButton->setClickCallback([]() { oApp->setAppState(App::AppState::RegistrationForm); });
 
     _signInButton->resize(st::authBlockWidth, _signInButton->minimumHeight());
     _registrationButton->resize(st::authBlockWidth, _registrationButton->minimumHeight());
