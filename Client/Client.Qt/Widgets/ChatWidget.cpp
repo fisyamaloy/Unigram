@@ -27,15 +27,22 @@ VoiceRecorder::~VoiceRecorder() { stopRecording(); }
 void VoiceRecorder::startRecording()
 {
     const QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss");
-    _pcmFileName            = QString("voice_%1.pcm").arg(timestamp);
     _mp3FileName            = QString("voice_%1.mp3").arg(timestamp);
-    _outputFile.setFileName(_pcmFileName);
+    _mp3File.setFileName(_mp3FileName);
 
-    if (!_outputFile.open(QIODevice::WriteOnly))
+    if (!_mp3File.open(QIODevice::WriteOnly))
     {
-        qDebug() << "ERROR: pcm file not opened";
+        qDebug() << "ERROR: unable to create mp3 file";
         return;
     }
+
+    _pLame = lame_init();
+    lame_set_mode(_pLame, MONO);
+    lame_set_in_samplerate(_pLame, BIT_RATE);
+    lame_set_num_channels(_pLame, CHANNEL_COUNT);
+    lame_set_quality(_pLame, 2);
+    lame_set_VBR(_pLame, vbr_default);
+    lame_init_params(_pLame);
 
     _audioStream.reset(_audioSource->start());
     connect(_audioStream.get(), &QIODevice::readyRead, this, &VoiceRecorder::writeAudioData);
@@ -44,76 +51,39 @@ void VoiceRecorder::startRecording()
 
 void VoiceRecorder::stopRecording()
 {
+    if (!_audioSource)
+    {
+        return;
+    }
+
     _audioSource->stop();
-    _outputFile.close();
+
+    if (_pLame)
+    {
+        unsigned char mp3Buffer[1024];
+        int           write = lame_encode_flush(_pLame, mp3Buffer, sizeof(mp3Buffer));
+        _mp3File.write((char*)mp3Buffer, write);
+        lame_close(_pLame);
+        _pLame = nullptr;
+    }
+
+    _mp3File.close();
     qDebug() << "Recording stopped. Convertation to mp3...";
-    convertToMp3();
 }
 
 void VoiceRecorder::writeAudioData()
 {
-    QByteArray data = _audioStream->readAll();
-    _outputFile.write(data);
-}
+    QByteArray pcmData    = _audioStream->readAll();
+    short int* pcmBuffer  = reinterpret_cast<short int*>(pcmData.data());
+    int        numSamples = static_cast<int>(pcmData.size()) / sizeof(short int);
 
-void VoiceRecorder::convertToMp3()
-{
-    QFile pcmFile(_pcmFileName);
-    if (!pcmFile.open(QIODevice::ReadOnly))
+    unsigned char mp3Buffer[8192];
+    int           mp3Size = lame_encode_buffer(_pLame, pcmBuffer, nullptr, numSamples, mp3Buffer, sizeof(mp3Buffer));
+
+    if (mp3Size > 0)
     {
-        qDebug() << "ERROR: mp3 file not opened";
-        return;
+        _mp3File.write((char*)mp3Buffer, mp3Size);
     }
-
-    QFile mp3File(_mp3FileName);
-    if (!mp3File.open(QIODevice::WriteOnly))
-    {
-        qDebug() << "ERROR: mp3 file is not created";
-        return;
-    }
-
-    lame_t lame = lame_init();
-    lame_set_mode(lame, MONO);
-    lame_set_in_samplerate(lame, BIT_RATE);
-    lame_set_num_channels(lame, CHANNEL_COUNT);
-    lame_set_quality(lame, 2);
-    lame_set_VBR(lame, vbr_default);
-    lame_init_params(lame);
-
-    static constexpr int PCM_SIZE            = 8192;
-    static constexpr int MP3_SIZE            = 8192;
-    short int            pcmBuffer[PCM_SIZE] = {0};
-    unsigned char        mp3Buffer[MP3_SIZE] = {0};
-
-    int read, write;
-    while ((read = pcmFile.read((char*)pcmBuffer, PCM_SIZE * sizeof(short int))) > 0)
-    {
-        if (read % 2 != 0)
-        {
-            qDebug() << "Warning: Unaligned PCM data, adjusting...";
-            read -= read % 2;
-        }
-
-        write = lame_encode_buffer(lame, pcmBuffer, nullptr, read / 2, mp3Buffer, MP3_SIZE);
-        qDebug() << "LAME encoding: read" << read << "bytes, write" << write << "bytes";
-        mp3File.write((char*)mp3Buffer, write);
-    }
-
-    write = lame_encode_flush(lame, mp3Buffer, MP3_SIZE);
-    if (write > 0)
-    {
-        mp3File.write((char*)mp3Buffer, write);
-    }
-    else
-    {
-        qDebug() << "Error flushing MP3 encoder!";
-    }
-    lame_close(lame);
-
-    pcmFile.close();
-    mp3File.close();
-
-    qDebug() << "MP3 file created successfully";
 }
 
 ChatWidget::ChatWidget(QWidget* parent) : QWidget(parent)

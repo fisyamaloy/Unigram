@@ -43,9 +43,10 @@ private:
     std::unique_ptr<QAudioSource>                   _audioSource;
     std::unique_ptr<QIODevice, QAudioDeviceDeleter> _audioStream;
 
-    QFile   _outputFile;
+    QFile   _mp3File;
     QString _pcmFileName;
     QString _mp3FileName;
+    lame_t  _pLame;
 };
 
 /**
