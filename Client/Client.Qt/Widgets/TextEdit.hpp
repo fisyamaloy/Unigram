@@ -7,6 +7,12 @@
 #include "InputFields.hpp"
 #include "Settings.hpp"
 
+enum class AudioRecordButtonStatus : std::uint8_t
+{
+    STOP = 0,
+    START
+};
+
 /**
  *  @class TextEdit
  *  @brief Widget with a text edit field and an edit bar.\
@@ -38,12 +44,16 @@ public:
 public slots:
     /// send message
     void sendButtonClick();
+    void audioButtonClick();
 
 signals:
     /// message send
     void sendMessage(QString textMessage);
     /// text changed
     void textChanged();
+    /// audio button clicked
+    void startAudioRecord();
+    void stopAudioRecord();
 
 private slots:
     void styleButtonClick(const QString& symbolStart, const QString& symbolEnd);
@@ -58,19 +68,21 @@ private:
 private:
     Settings& _settings;
 
-    const int     _symbolSize           = 3;
-    const QString _boldSymbolOpen       = "<B>";
-    const QString _boldSymbolClose      = "</B>";
-    const QString _italicSymbolOpen     = "<I>";
-    const QString _italicSymbolClose    = "</I>";
-    const QString _underlineSymbolOpen  = "<U>";
-    const QString _underlineSymbolClose = "</U>";
+    const int               _symbolSize           = 3;
+    const QString           _boldSymbolOpen       = "<B>";
+    const QString           _boldSymbolClose      = "</B>";
+    const QString           _italicSymbolOpen     = "<I>";
+    const QString           _italicSymbolClose    = "</I>";
+    const QString           _underlineSymbolOpen  = "<U>";
+    const QString           _underlineSymbolClose = "</U>";
+    AudioRecordButtonStatus _audioButtonStatus    = AudioRecordButtonStatus::STOP;
 
     std::unique_ptr<QVBoxLayout>  _mainVerticalLayout;
     std::unique_ptr<QHBoxLayout>  _horizontalButtonLayout;
     std::unique_ptr<FlatButton>   _boldnessButton;
     std::unique_ptr<FlatButton>   _italicButton;
     std::unique_ptr<FlatButton>   _underlineButton;
+    std::unique_ptr<IconButton>   _recordingAudioButton;
     std::unique_ptr<FlatButton>   _sendButton;
     std::unique_ptr<FlatTextEdit> _messageInput;
     std::unique_ptr<QSpacerItem>  _horizontalButtonSpacer;

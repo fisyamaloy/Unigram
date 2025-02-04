@@ -1,10 +1,52 @@
 #pragma once
 #include <Network/Primitives.hpp>
+#include <QAudioSource>
+#include <QFile>
 
 #include "Widgets/ChannelBar.hpp"
 #include "Widgets/InputFields.hpp"
 #include "Widgets/MessageWidget.hpp"
 #include "Widgets/TextEdit.hpp"
+#include "lame/lame.h"
+
+struct QAudioDeviceDeleter
+{
+    void operator()(QIODevice* device) const
+    {
+        if (device)
+        {
+            device->close();
+        }
+    }
+};
+
+class VoiceRecorder : public QObject
+{
+    Q_OBJECT
+
+public:
+    VoiceRecorder(QObject* parent = nullptr);
+    VoiceRecorder(const VoiceRecorder&) = delete;
+    ~VoiceRecorder();
+
+    void startRecording();
+    void stopRecording();
+
+    QString getMP3FileName() const { return _mp3FileName; }
+    QString getPCMFileName() const { return _pcmFileName; }
+
+private:
+    void writeAudioData();
+    void convertToMp3();
+
+private:
+    std::unique_ptr<QAudioSource>                   _audioSource;
+    std::unique_ptr<QIODevice, QAudioDeviceDeleter> _audioStream;
+
+    QFile   _outputFile;
+    QString _pcmFileName;
+    QString _mp3FileName;
+};
 
 /**
  *  @class ChatWidget
@@ -34,15 +76,18 @@ private slots:
     void setReply(QString messageText, QString username, uint64_t messageId);
     void addMessages(const std::vector<Network::MessageInfo>& messages);
     void addReplies(const std::vector<Network::ReplyInfo>& replies);
+    void recordVoiceMessage();
+    void stopRecordingVoiceMessage();
 
     void requestMessages() const;
     void updateLayout();
 
 private:
-    std::unique_ptr<ChannelBar>  _channelBar;
-    std::unique_ptr<ReplyWidget> _replyWidget;
-    std::unique_ptr<ChatHistory> _chatHistory;
-    std::unique_ptr<TextEdit>    _textEdit;
+    std::unique_ptr<ChannelBar>    _channelBar;
+    std::unique_ptr<ReplyWidget>   _replyWidget;
+    std::unique_ptr<ChatHistory>   _chatHistory;
+    std::unique_ptr<TextEdit>      _textEdit;
+    std::unique_ptr<VoiceRecorder> _voiceRecorder;
 
     std::unique_ptr<QTimer> _requestTimer;
     std::uint64_t           _channelID{};

@@ -14,12 +14,14 @@
         <file>icons/max-w-200.png</file>
         <file>icons/max-w-250.png</file>
         <file>icons/max-w-300.png</file>
+        <file>icons/mic-w-100.png</file>
+        <file>icons/mic-w-125.png</file>
+        <file>icons/mic-w-150.png</file>
+        <file>icons/mic-w-175.png</file>
+        <file>icons/mic-w-200.png</file>
+        <file>icons/mic-w-250.png</file>
+        <file>icons/mic-w-300.png</file>
         <file>icons/min-w-100.png</file>
-        <file>icons/min-w-125.png</file>
-        <file>icons/min-w-150.png</file>
-        <file>icons/min-w-200.png</file>
-        <file>icons/min-w-250.png</file>
-        <file>icons/min-w-300.png</file>
         <file>icons/restore-w-100.png</file>
         <file>icons/restore-w-125.png</file>
         <file>icons/restore-w-150.png</file>

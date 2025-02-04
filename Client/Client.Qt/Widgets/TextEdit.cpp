@@ -10,6 +10,8 @@ TextEdit::TextEdit(QWidget* parent) : QWidget(parent), _settings(Settings::getIn
     _boldnessButton         = std::make_unique<FlatButton>(this, "B", st::boldnessButton);
     _italicButton           = std::make_unique<FlatButton>(this, "I", st::italicButton);
     _underlineButton        = std::make_unique<FlatButton>(this, "U", st::underlineButton);
+    _recordingAudioButton   = std::make_unique<IconButton>(this, QString(""), st::recordingAudioIconButton);
+    
     _sendButton             = std::make_unique<FlatButton>(this, "Send");
     _messageInput           = std::make_unique<FlatTextEdit>();
 
@@ -19,6 +21,7 @@ TextEdit::TextEdit(QWidget* parent) : QWidget(parent), _settings(Settings::getIn
     _horizontalButtonLayout->addWidget(_italicButton.get());
     _horizontalButtonLayout->addWidget(_underlineButton.get());
     _horizontalButtonLayout->addItem(_horizontalButtonSpacer.get());
+    _horizontalButtonLayout->addWidget(_recordingAudioButton.get());
     _horizontalButtonLayout->addWidget(_sendButton.get());
     if (auto fontSize = _settings.getFontSize())
     {
@@ -32,6 +35,7 @@ TextEdit::TextEdit(QWidget* parent) : QWidget(parent), _settings(Settings::getIn
     _boldnessButton->setClickCallback([&]() { styleButtonClick(_boldSymbolOpen, _boldSymbolClose); });
     _italicButton->setClickCallback([&]() { styleButtonClick(_italicSymbolOpen, _italicSymbolClose); });
     _underlineButton->setClickCallback([&]() { styleButtonClick(_underlineSymbolOpen, _underlineSymbolClose); });
+    _recordingAudioButton->setClickCallback([&]() { audioButtonClick(); });
     _sendButton->setClickCallback([&]() { sendButtonClick(); });
     connect(_messageInput.get(), &FlatTextEdit::textChanged, this, &TextEdit::textChanged);
     setMaximumHeight(Style::valueDPIScale(400));
@@ -52,6 +56,30 @@ void TextEdit::sendButtonClick()
     {
         emit sendMessage(getText());
         clear();
+    }
+}
+
+void TextEdit::audioButtonClick()
+{
+    if (_audioButtonStatus == AudioRecordButtonStatus::START)
+    {
+        _audioButtonStatus = AudioRecordButtonStatus::STOP;
+    }
+    else if (_audioButtonStatus == AudioRecordButtonStatus::STOP)
+    {
+        _audioButtonStatus = AudioRecordButtonStatus::START;
+    }
+
+    // TODO:: change icon
+    // changing icon ...
+
+    if (_audioButtonStatus == AudioRecordButtonStatus::START)
+    {
+        emit startAudioRecord();
+    }
+    else if (_audioButtonStatus == AudioRecordButtonStatus::STOP)
+    {
+        emit stopAudioRecord();
     }
 }
 
