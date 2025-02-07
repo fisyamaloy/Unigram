@@ -49,6 +49,7 @@ jobs:
           arch: 'gcc_64'
           target: 'desktop'
           dir: '${{ github.workspace }}'
+          modules: 'qtbase qtmultimedia'
           install-deps: 'true'
           setup-python: 'false'
           set-env: 'true'
