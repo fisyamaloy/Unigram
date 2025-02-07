@@ -48,7 +48,7 @@ jobs:
           arch: 'win64_msvc2019_64'
           target: 'desktop'
           dir: '${{ github.workspace }}'
-          modules: 'qtbase qtmultimedia'
+          modules: 'qtmultimedia'
           install-deps: 'true'
           setup-python: 'false'
           set-env: 'true'
