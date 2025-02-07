@@ -2,23 +2,13 @@
 #include <Network/Primitives.hpp>
 #include <QAudioSource>
 #include <QFile>
+#include <QtCore>
 
 #include "Widgets/ChannelBar.hpp"
 #include "Widgets/InputFields.hpp"
 #include "Widgets/MessageWidget.hpp"
 #include "Widgets/TextEdit.hpp"
 #include "lame/lame.h"
-
-struct QAudioDeviceDeleter
-{
-    void operator()(QIODevice* device) const
-    {
-        if (device)
-        {
-            device->close();
-        }
-    }
-};
 
 class VoiceRecorder : public QObject
 {
@@ -32,21 +22,22 @@ public:
     void startRecording();
     void stopRecording();
 
-    QString getMP3FileName() const { return _mp3FileName; }
-    QString getPCMFileName() const { return _pcmFileName; }
+    inline QFileInfo getMP3FileInfo() const
+    {
+        QFileInfo info(_mp3File);
+        return info;
+    }
 
 private:
     void writeAudioData();
-    void convertToMp3();
 
 private:
-    std::unique_ptr<QAudioSource>                   _audioSource;
-    std::unique_ptr<QIODevice, QAudioDeviceDeleter> _audioStream;
+    std::unique_ptr<QAudioSource> _audioSource;
+    std::unique_ptr<QIODevice>    _audioStream;
 
-    QFile   _mp3File;
-    QString _pcmFileName;
-    QString _mp3FileName;
-    lame_t  _pLame;
+    QAudioFormat _format;
+    QFile        _mp3File;
+    lame_t       _pLame;
 };
 
 /**

@@ -46,7 +46,7 @@ public:
 template <typename Archive>
 void serialize(Archive& ar, Network::ChannelInfo& o)
 {
-    ar& o.creatorID& o.channelID& o.channelName;
+    ar & o.creatorID & o.channelID & o.channelName;
 }
 
 using ChannelDeleteInfo = ChannelInfo;
@@ -87,7 +87,7 @@ public:
 template <typename Archive>
 void serialize(Archive& ar, Network::ChannelSubscriptionInfo& o)
 {
-    ar& o.channelID;
+    ar & o.channelID;
 }
 
 /**
@@ -100,7 +100,7 @@ struct LoginInfo
     /// pwdHash hash of user's password as string variable
     std::string pwdHash;
     /// Default LoginInfo constructor
-    LoginInfo()                 = default;
+    LoginInfo() = default;
     /// Default LoginInfo copy constructor
     LoginInfo(const LoginInfo&) = default;
     /// LoginInfo constructor with initializing list
@@ -115,7 +115,7 @@ struct LoginInfo
 template <typename Archive>
 void serialize(Archive& ar, LoginInfo& o)
 {
-    ar& o.login& o.pwdHash;
+    ar & o.login & o.pwdHash;
 }
 
 /**
@@ -142,7 +142,7 @@ struct RegistrationInfo
     /// Default RegistrationInfo copy constructor
     RegistrationInfo(const RegistrationInfo&) = default;
     /// Default RegistrationInfo destructor
-    ~RegistrationInfo()                       = default;
+    ~RegistrationInfo() = default;
 
     /// Default Registration copy assignment constructor
     RegistrationInfo& operator=(const RegistrationInfo& other) = default;
@@ -159,7 +159,7 @@ struct RegistrationInfo
 template <typename Archive>
 void serialize(Archive& ar, Network::RegistrationInfo& o)
 {
-    ar& o.email& o.login& o.passwordHash;
+    ar & o.email & o.login & o.passwordHash;
 }
 
 /**
@@ -193,7 +193,7 @@ struct MessageInfo
     /// Default MessageIndo copy constructor
     MessageInfo(const MessageInfo&) = default;
     /// Default MessageIndo destructor
-    ~MessageInfo()                  = default;
+    ~MessageInfo() = default;
 
     /// Operator == to compare Message Info
     friend bool operator==(const MessageInfo& first, const MessageInfo& second)
@@ -203,17 +203,14 @@ struct MessageInfo
     }
 
     /// Operator < to compare MessageInfo
-    friend bool operator<(const MessageInfo& lhs, const MessageInfo& rhs) 
-    {
-        return lhs.time < rhs.time;
-    }
+    friend bool operator<(const MessageInfo& lhs, const MessageInfo& rhs) { return lhs.time < rhs.time; }
 };
 
 /// Serialize method for serialize Message Info for each field
 template <typename Archive>
 void serialize(Archive& ar, Network::MessageInfo& o)
 {
-    ar& o.channelID& o.senderID& o.msgID& o.message& o.reactions& o.time& o.userLogin;
+    ar & o.channelID & o.senderID & o.msgID & o.message & o.reactions & o.time & o.userLogin;
 }
 
 /**
@@ -243,17 +240,13 @@ struct ReplyInfo
     /// Default Reply copy constructor
     ReplyInfo(const ReplyInfo&) = default;
     /// Default ReplyInfo destructor
-    ~ReplyInfo()                = default;
+    ~ReplyInfo() = default;
 
     /// Operator == to compare Reply Info
     friend bool operator==(const ReplyInfo& first, const ReplyInfo& second)
     {
-        return first.message    == second.message    &&
-               first.msgID      == second.msgID      &&
-               first.senderID   == second.senderID   &&
-               first.msgIdOwner == second.msgIdOwner &&
-               first.channelID  == second.channelID  &&
-               first.userLogin  == second.userLogin;
+        return first.message == second.message && first.msgID == second.msgID && first.senderID == second.senderID &&
+               first.msgIdOwner == second.msgIdOwner && first.channelID == second.channelID && first.userLogin == second.userLogin;
     }
 };
 
@@ -261,7 +254,40 @@ struct ReplyInfo
 template <typename Archive>
 void serialize(Archive& ar, Network::ReplyInfo& o)
 {
-    ar& o.channelID& o.message& o.msgID& o.senderID& o.msgIdOwner& o.userLogin;
+    ar & o.channelID & o.message & o.msgID & o.senderID & o.msgIdOwner & o.userLogin;
+}
+
+struct VoiceMessageInfo
+{
+    std::string               fileName;
+    std::vector<std::uint8_t> messageRawData;
+    std::uint64_t             channelID;
+    std::uint64_t             senderID;
+    std::string               userLogin;
+
+    VoiceMessageInfo() = default;
+    VoiceMessageInfo(std::string fileName, std::vector<std::uint8_t> messageRawData, const std::uint64_t channelID,
+                     const std::uint64_t senderID, std::string userLogin)
+        : fileName(std::move(fileName)),
+          messageRawData(std::move(messageRawData)),
+          channelID(channelID),
+          senderID(senderID),
+          userLogin(std::move(userLogin))
+    {
+    }
+    ~VoiceMessageInfo() = default;
+
+    friend bool operator==(const VoiceMessageInfo& first, const VoiceMessageInfo& second)
+    {
+        return first.channelID == second.channelID && first.senderID == second.senderID && first.fileName == second.fileName &&
+               first.messageRawData.size() == second.messageRawData.size() && first.userLogin == second.userLogin;
+    }
+};
+
+template <typename Archive>
+void serialize(Archive& ar, Network::VoiceMessageInfo& o)
+{
+    ar & o.fileName & o.messageRawData & o.channelID & o.senderID & o.userLogin;
 }
 
 }  // namespace Network

@@ -3,6 +3,7 @@
 #include "Network/Connection.hpp"
 #include "Network/Message.hpp"
 #include "Network/SafeQueue.hpp"
+#include <filesystem>
 
 namespace Network
 {
@@ -122,6 +123,8 @@ public:
      */
     void userMessageReaction(const std::uint64_t messageID, const std::uint32_t reactionID) const;
 
+    void storeVoiceMessage(const std::filesystem::path& filepath, const uint64_t channelID) const;
+
 protected:
     /// Disconnect handler
     virtual void onDisconnect();
@@ -164,6 +167,8 @@ protected:
     virtual void onDirectMessageCreateAnswer(Utility::DirectMessageStatus directMessageCreateAnswer);
     /// Reaction Answer handler
     virtual void onMessageReactionAnswer(Utility::ReactionMessageCodes reactionState);
+
+    virtual void onVoiceMessageAnswer(Utility::VoiceMessageCodes voiceMessageState);
     
 private:
     asio::io_context _context;

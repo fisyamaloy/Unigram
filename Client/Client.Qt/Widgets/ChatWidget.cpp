@@ -1,6 +1,7 @@
 ﻿#include "ChatWidget.hpp"
 
 #include <QFile>
+#include <QtCore>
 #include <QtEvents>
 #include <utility>
 
@@ -13,22 +14,20 @@ static constexpr int CHANNEL_COUNT = 1;
 
 VoiceRecorder::VoiceRecorder(QObject* parent) : QObject(parent)
 {
-    QAudioFormat _format;
     _format.setSampleRate(BIT_RATE);
     _format.setChannelCount(CHANNEL_COUNT);
     _format.setSampleFormat(QAudioFormat::Int16);
-
-    _audioSource = std::make_unique<QAudioSource>(_format, this);
-    // outputFile.setFileName(QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/voice_message.pcm");
 }
 
-VoiceRecorder::~VoiceRecorder() { stopRecording(); }
+VoiceRecorder::~VoiceRecorder() { 
+    stopRecording();
+}
 
 void VoiceRecorder::startRecording()
 {
-    const QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss");
-    _mp3FileName            = QString("voice_%1.mp3").arg(timestamp);
-    _mp3File.setFileName(_mp3FileName);
+    const QString timestamp   = QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss");
+    const QString mp3FilePath = QString("voice_%1.mp3").arg(timestamp);
+    _mp3File.setFileName(mp3FilePath);
 
     if (!_mp3File.open(QIODevice::WriteOnly))
     {
@@ -44,6 +43,10 @@ void VoiceRecorder::startRecording()
     lame_set_VBR(_pLame, vbr_default);
     lame_init_params(_pLame);
 
+    _audioStream.reset();
+    _audioSource.reset();
+
+    _audioSource = std::make_unique<QAudioSource>(_format, this);
     _audioStream.reset(_audioSource->start());
     connect(_audioStream.get(), &QIODevice::readyRead, this, &VoiceRecorder::writeAudioData);
     qDebug() << "Start recording";
@@ -51,12 +54,14 @@ void VoiceRecorder::startRecording()
 
 void VoiceRecorder::stopRecording()
 {
-    if (!_audioSource)
+    if (_audioSource)
     {
-        return;
+        _audioSource->stop();
     }
-
-    _audioSource->stop();
+    if (_audioStream)
+    {
+        _audioStream.reset();
+    }
 
     if (_pLame)
     {
@@ -152,15 +157,15 @@ void ChatWidget::recordVoiceMessage()
 {
     qDebug() << "Start recording";
     _voiceRecorder->startRecording();
-    // oApp->connectionManager()->sendAudioMessage([aduio_data], _channelID);
 }
 
 void ChatWidget::stopRecordingVoiceMessage()
 {
     qDebug() << "Stop recording\n";
     _voiceRecorder->stopRecording();
-    const QString recorderedFileName = _voiceRecorder->getMP3FileName();
-    qDebug() << "record name: " << recorderedFileName;
+    const QFileInfo recorderedFileInfo = _voiceRecorder->getMP3FileInfo();
+    qDebug() << "record path: " << recorderedFileInfo.absoluteFilePath();
+    oApp->connectionManager()->storeVoiceMessage(recorderedFileInfo.filesystemAbsoluteFilePath(), _channelID);
 }
 
 void ChatWidget::requestMessages() const

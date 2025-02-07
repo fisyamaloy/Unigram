@@ -16,14 +16,11 @@ void init_StyleIcons(int scale);
 
 namespace st
 {
-/// smileIcon: Style::icon
 extern const Style::icon& smileIcon;
-/// dislikeIcon: Style::icon
 extern const Style::icon& dislikeIcon;
-/// likeIcon: Style::icon
 extern const Style::icon& likeIcon;
-/// fireIcon: Style::icon
 extern const Style::icon& fireIcon;
-/// catIcon: Style::icon
 extern const Style::icon& catIcon;
+extern const Style::icon& activeRecordingMicIcon;
+extern const Style::icon& passiveRecordingMicIcon;
 }  // namespace st

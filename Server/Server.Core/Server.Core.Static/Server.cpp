@@ -4,6 +4,7 @@
 
 #include "DataAccess.Postgre/PostgreRepositoryManager.hpp"
 #include "Network/Primitives.hpp"
+#include <fstream>
 
 using Network::Connection;
 using Network::Message;
@@ -338,6 +339,26 @@ void Server::onMessage(const std::shared_ptr<Connection>& client, Message& messa
 
             messageToClient.mBody = std::make_any<Utility::DirectMessageStatus>(result.get());
             client->send(messageToClient);
+        }
+        break;
+        case Network::Message::MessageType::VoiceMessageRequest:
+        {
+            auto vmi = std::any_cast<Network::VoiceMessageInfo>(message.mBody);
+
+            std::ofstream out(vmi.fileName, std::ios_base::binary);
+            if (out)
+            {
+                out.write(reinterpret_cast<const char*>(vmi.messageRawData.data()), vmi.messageRawData.size());
+                out.close();
+            }
+
+            //auto result = mPostgreManager->pushRequest(&IDirectMessageRepository::addDirectChat, fmt(client->getUserID()), fmt(secondUser));
+
+            Network::Message messageToClient;
+            //messageToClient.mHeader.mMessageType = Network::Message::MessageType::VoiceMessageAnswer;
+
+            //messageToClient.mBody = std::make_any<Utility::DirectMessageStatus>(result.get());
+            //client->send(messageToClient);
         }
         break;
 

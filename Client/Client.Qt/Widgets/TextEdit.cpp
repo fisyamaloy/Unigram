@@ -64,14 +64,13 @@ void TextEdit::audioButtonClick()
     if (_audioButtonStatus == AudioRecordButtonStatus::START)
     {
         _audioButtonStatus = AudioRecordButtonStatus::STOP;
+        _recordingAudioButton->setIcon(&st::passiveRecordingMicIcon);
     }
     else if (_audioButtonStatus == AudioRecordButtonStatus::STOP)
     {
         _audioButtonStatus = AudioRecordButtonStatus::START;
+        _recordingAudioButton->setIcon(&st::activeRecordingMicIcon);
     }
-
-    // TODO:: change icon
-    // changing icon ...
 
     if (_audioButtonStatus == AudioRecordButtonStatus::START)
     {

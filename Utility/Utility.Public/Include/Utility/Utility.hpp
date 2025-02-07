@@ -121,12 +121,24 @@ enum class DirectMessageStatus : std::uint8_t
     FAILED,
 };
 
+enum class MessageStatus : std::uint8_t
+{
+    SUCCESS,
+    FAILED,
+};
+
 /**
  * @brief enum for tracking message's reaction status
  * @details Utility::ReactionMessageCodes updateMessageReactions(const Network::MessageInfo& mi) /
  *    returns one of these codes.
  */
 enum class ReactionMessageCodes : std::uint8_t
+{
+    SUCCESS,
+    FAILED
+};
+
+enum class VoiceMessageCodes : std::uint8_t
 {
     SUCCESS,
     FAILED

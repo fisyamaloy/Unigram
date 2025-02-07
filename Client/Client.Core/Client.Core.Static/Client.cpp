@@ -1,9 +1,10 @@
 #include "Client.hpp"
 
-#include <limits>
-
 #include <Crypto.Static/Cryptography.hpp>
 #include <Network/Primitives.hpp>
+#include <filesystem>
+#include <fstream>
+#include <limits>
 
 #include "ServerInfo.hpp"
 
@@ -274,10 +275,32 @@ void Client::userMessageReaction(const std::uint64_t messageID, const std::uint3
 
     // using max uint32_t as special value
     mi.reactions[reactionID] = std::numeric_limits<std::uint32_t>::max();
-    
+
     Network::Message message;
     message.mHeader.mMessageType = MessageType::MessageReactionRequest;
     message.mBody                = std::make_any<Network::MessageInfo>(mi);
+
+    send(message);
+}
+
+void Client::storeVoiceMessage(const std::filesystem::path& filepath, const uint64_t channelID) const
+{
+    std::ifstream mp3File(filepath.c_str(), std::ios::binary);
+    if (!mp3File)
+    {
+        std::cerr << "Error: unable to open: " << filepath << '\n';
+        return;
+    }
+    std::vector<uint8_t> buffer(std::istreambuf_iterator<char>(mp3File), {});
+
+    Network::VoiceMessageInfo vmi;
+    vmi.channelID      = channelID;
+    vmi.fileName       = filepath.filename().string();
+    vmi.messageRawData = std::move(buffer);
+
+    Network::Message message;
+    message.mHeader.mMessageType = MessageType::VoiceMessageRequest;
+    message.mBody                = std::make_any<Network::VoiceMessageInfo>(vmi);
 
     send(message);
 }
@@ -401,7 +424,7 @@ void Client::loop()
                 onChannelCreateAnswer(channelCreateCode);
             }
             break;
-            
+
             case MessageType::MessageReactionAnswer:
             {
                 auto messageInfo = std::any_cast<Utility::ReactionMessageCodes>(message.mBody);
@@ -413,6 +436,12 @@ void Client::loop()
             {
                 auto directMessageCreateAnswer = std::any_cast<Utility::DirectMessageStatus>(message.mBody);
                 onDirectMessageCreateAnswer(directMessageCreateAnswer);
+            }
+            break;
+            case MessageType::VoiceMessageAnswer:
+            {
+                auto voiceMsgAnswer = std::any_cast<Utility::VoiceMessageCodes>(message.mBody);
+                onVoiceMessageAnswer(voiceMsgAnswer);
             }
             break;
 
@@ -475,6 +504,12 @@ void Client::onUserMessageDeleteAnswer(const Utility::DeletingMessageCodes delet
 void Client::onMessageReactionAnswer(const Utility::ReactionMessageCodes reactionState)
 {
     (void)(reactionState);
+    std::cerr << "[Client][Warning] onMessageReaction answer is not implemented\n";
+}
+
+void Client::onVoiceMessageAnswer(Utility::VoiceMessageCodes voiceMessageState)
+{
+    (void)(voiceMessageState);
     std::cerr << "[Client][Warning] onMessageReaction answer is not implemented\n";
 }
 

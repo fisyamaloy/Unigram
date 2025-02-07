@@ -67,6 +67,8 @@ signals:
     void onDirectMessageCreateAnswer(Utility::DirectMessageStatus directMessageCreateAnswer);
     /// Reaction update answer handler
     void onMessageReactionAnswer(const Utility::ReactionMessageCodes reactionCode);
+    /// Reaction update answer handler
+    void onVoiceMessageAnswer(const Utility::VoiceMessageCodes voiceMessageCode);
 
 private:
     static ReceiverManager* self;
@@ -128,4 +130,5 @@ protected:
     void onDirectMessageCreateAnswer(Utility::DirectMessageStatus directMessageCreateAnswer) override;
     /// Reaction update answer handler
     void onMessageReactionAnswer(const Utility::ReactionMessageCodes reactionCode) override;
+    void onVoiceMessageAnswer(const Utility::VoiceMessageCodes voiceMessageCode) override;
 };

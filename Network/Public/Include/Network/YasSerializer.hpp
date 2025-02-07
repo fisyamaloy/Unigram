@@ -52,7 +52,9 @@ restoreWarning
         {
             try
             {
-                suppressWarning(4127, "-Wtype-limits") msg = yas::save<flags>(data);
+                suppressWarning(4127, "-Wtype-limits") 
+                    msg = yas::save<flags>(data);
+                    std::cout << "serialized data size: " << msg.size << '\n';
                 restoreWarning
             }
             catch (const std::exception& e)
@@ -74,6 +76,9 @@ restoreWarning
         template <typename T>
         static SerializedState deserialize(const yas::shared_buffer source, T& data)
         {
+            std::cout << "source input size: " << source.size << '\n';
+
+            data = T();
             try
             {
                 suppressWarning(4127, "-Wtype-limits")
