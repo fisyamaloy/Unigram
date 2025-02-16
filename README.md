@@ -8,10 +8,7 @@ There are a few steps to get up and running on own system:
 
 #### 1. Software dependencies
 
-[Conan](https://conan.io/index.html)
-
-This is an open source, decentralized and multi-platform package manager for C/C++.
-
+[vcpkg](https://learn.microsoft.com/en-us/vcpkg/)
 Recommended install:
 1. Install vcpkg: 
 (https://github.com/microsoft/vcpkg)
