@@ -1,4 +1,4 @@
-CREATE TABLE users ( id serial PRIMARY KEY, email varchar(32) UNIQUE NOT NULL, login varchar(128) UNIQUE NOT NULL, password_hash varchar(128) UNIQUE NOT NULL );
+﻿CREATE TABLE users ( id serial PRIMARY KEY, email varchar(32) UNIQUE NOT NULL, login varchar(128) UNIQUE NOT NULL, password_hash varchar(128) UNIQUE NOT NULL );
 
 CREATE TABLE user_personal_data ( user_id int NOT NULL, first_name varchar(32), second_name varchar(32), birthday date, sex boolean );
 
@@ -8,7 +8,7 @@ CREATE TABLE user_friends_data ( user_id int NOT NULL, friend_id int UNIQUE NOT 
 
 CREATE TABLE user_channels ( user_id int NOT NULL, channel_id int NOT NULL, UNIQUE (user_id, channel_id) );
 
-CREATE TABLE msgs ( msg_id serial PRIMARY KEY, sender_id int NOT NULL, send_time timestamp, msg text NOT NULL );
+CREATE TABLE msgs ( msg_id serial PRIMARY KEY, sender_id int NOT NULL, send_time timestamp, msg_type CHAR(1) NOT NULL DEFAULT 'T' CHECK (msg_type IN ('T', 'A', 'V', 'I', 'F')));
 
 CREATE TABLE msg_reactions ( msg_id int NOT NULL, likes int[] DEFAULT array[]::int[], dislikes int[] DEFAULT array[]::int[], fires int[] DEFAULT array[]::int[], cats int[] DEFAULT array[]::int[], smiles int[] DEFAULT array[]::int[]);
 
@@ -16,29 +16,40 @@ CREATE TABLE channel_msgs ( channel_id int NOT NULL, msg_id int NOT NULL );
 
 CREATE TABLE channels ( id serial PRIMARY KEY, channel_name varchar(64) UNIQUE, creator_id int NOT NULL, user_limit int NOT NULL );
 
-CREATE TABLE channel_images ( channel_id int NOT NULL, image_id int NOT NULL, save_date timestamp NOT NULL, sender_id int NOT NULL );
-
-CREATE TABLE channel_files ( channel_id int NOT NULL, file_id int NOT NULL, save_date timestamp NOT NULL, sender_id int NOT NULL );
-
-CREATE TABLE channel_videos ( channel_id int NOT NULL, video_id int NOT NULL, save_date timestamp NOT NULL, sender_id int NOT NULL );
-
-CREATE TABLE channel_audio ( channel_id int NOT NULL, audio_id int NOT NULL, save_date timestamp NOT NULL, sender_id int NOT NULL );
-
 CREATE TABLE channel_links ( channel_id int NOT NULL, link_id int NOT NULL, save_date timestamp NOT NULL, sender_id int NOT NULL );
-
-CREATE TABLE images ( image_id serial PRIMARY KEY, image_name varchar(32) NOT NULL, image_data bytea NOT NULL );
-
-CREATE TABLE files ( file_id serial PRIMARY KEY, file_name varchar(32) NOT NULL, file_data bytea NOT NULL );
-
-CREATE TABLE videos ( video_id serial PRIMARY KEY, video_name varchar(32) NOT NULL, video_data bytea NOT NULL );
-
-CREATE TABLE audio ( audio_id serial PRIMARY KEY, audio_name varchar(32) NOT NULL, audio_data bytea NOT NULL );
 
 CREATE TABLE links ( link_id serial PRIMARY KEY, link varchar(64) NOT NULL );
 
 CREATE TABLE replies ( sender_id int NOT NULL, msg_id_owner int NOT NULL, msg_id_ref int NOT NULL, msg text NOT NULL );
 
 CREATE TABLE channel_replies ( channel_id int NOT NULL, msg_id_owner int NOT NULL );
+
+CREATE TABLE text_msgs (
+    msg_id int PRIMARY KEY REFERENCES msgs(msg_id) ON DELETE CASCADE,
+    msg TEXT NOT NULL
+);
+
+CREATE TABLE voice_msgs (
+    msg_id int PRIMARY KEY REFERENCES msgs(msg_id) ON DELETE CASCADE,
+    voice_name VARCHAR(128) NOT NULL,
+    duration INT NOT NULL CHECK (duration > 0)
+);
+
+CREATE TABLE video_msgs (
+    msg_id int PRIMARY KEY REFERENCES msgs(msg_id) ON DELETE CASCADE,
+    video_name VARCHAR(128) NOT NULL,
+    duration INT NOT NULL CHECK (duration > 0)
+);
+
+CREATE TABLE image_msgs (
+    msg_id int PRIMARY KEY REFERENCES msgs(msg_id) ON DELETE CASCADE,
+    image_name VARCHAR(128) NOT NULL
+);
+
+CREATE TABLE file_msgs (
+    msg_id int PRIMARY KEY REFERENCES msgs(msg_id) ON DELETE CASCADE,
+    file_name VARCHAR(128) NOT NULL
+);
 
 ALTER TABLE user_personal_data ADD FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE;
 
@@ -59,30 +70,6 @@ ALTER TABLE channel_msgs ADD FOREIGN KEY (channel_id) REFERENCES channels (id) O
 ALTER TABLE channel_msgs ADD FOREIGN KEY (msg_id) REFERENCES msgs (msg_id) ON DELETE CASCADE;
 
 ALTER TABLE channels ADD FOREIGN KEY (creator_id) REFERENCES users (id) ON DELETE CASCADE;
-
-ALTER TABLE channel_images ADD FOREIGN KEY (channel_id) REFERENCES channels (id) ON DELETE CASCADE;
-
-ALTER TABLE channel_images ADD FOREIGN KEY (image_id) REFERENCES images (image_id) ON DELETE CASCADE;
-
-ALTER TABLE channel_images ADD FOREIGN KEY (sender_id) REFERENCES users (id) ON DELETE SET NULL;
-
-ALTER TABLE channel_files ADD FOREIGN KEY (channel_id) REFERENCES channels (id) ON DELETE SET NULL;
-
-ALTER TABLE channel_files ADD FOREIGN KEY (file_id) REFERENCES files (file_id) ON DELETE CASCADE;
-
-ALTER TABLE channel_files ADD FOREIGN KEY (sender_id) REFERENCES users (id) ON DELETE SET NULL;
-
-ALTER TABLE channel_videos ADD FOREIGN KEY (channel_id) REFERENCES channels (id) ON DELETE SET NULL;
-
-ALTER TABLE channel_videos ADD FOREIGN KEY (video_id) REFERENCES videos (video_id) ON DELETE CASCADE;
-
-ALTER TABLE channel_videos ADD FOREIGN KEY (sender_id) REFERENCES users (id) ON DELETE SET NULL;
-
-ALTER TABLE channel_audio ADD FOREIGN KEY (channel_id) REFERENCES channels (id) ON DELETE SET NULL;
-
-ALTER TABLE channel_audio ADD FOREIGN KEY (audio_id) REFERENCES audio (audio_id) ON DELETE CASCADE;
-
-ALTER TABLE channel_audio ADD FOREIGN KEY (sender_id) REFERENCES users (id) ON DELETE SET NULL;
 
 ALTER TABLE channel_links ADD FOREIGN KEY (channel_id) REFERENCES channels (id) ON DELETE SET NULL;
 

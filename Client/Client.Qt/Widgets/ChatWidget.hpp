@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <Network/Primitives.hpp>
 #include <QAudioSource>
 #include <QFile>
@@ -22,11 +22,7 @@ public:
     void startRecording();
     void stopRecording();
 
-    inline QFileInfo getMP3FileInfo() const
-    {
-        QFileInfo info(_mp3File);
-        return info;
-    }
+    inline QFileInfo getMP3FileInfo() const { return QFileInfo{_mp3File}; }
 
 private:
     void writeAudioData();
@@ -69,7 +65,7 @@ private slots:
     void addMessages(const std::vector<Network::MessageInfo>& messages);
     void addReplies(const std::vector<Network::ReplyInfo>& replies);
     void recordVoiceMessage();
-    void stopRecordingVoiceMessage();
+    void stopRecordingVoiceMessage(const int duration);
 
     void requestMessages() const;
     void updateLayout();

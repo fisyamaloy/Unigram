@@ -85,15 +85,26 @@ Style::IconButton     _userReactionIconButton   = {{Qt::Uninitialized},
 
 
 Style::IconButton _recordingAudioIconButton = {{Qt::Uninitialized},
-                                                      {Qt::Uninitialized},
-                                                      {Qt::Uninitialized},
-                                                      {Qt::Uninitialized},
-                                                      {Qt::Uninitialized},
-                                                      {0, 0, 0, 0},
-                                                      0,
-                                                      {Qt::Uninitialized},
-                                                      {Qt::Uninitialized},
-                                                      0};
+                                               {Qt::Uninitialized},
+                                               {Qt::Uninitialized},
+                                               {Qt::Uninitialized},
+                                               {Qt::Uninitialized},
+                                               {0, 0, 0, 0},
+                                               0,
+                                               {Qt::Uninitialized},
+                                               {Qt::Uninitialized},
+                                               0};
+
+Style::IconButton _playAudioIconButton = {{Qt::Uninitialized},
+                                          {Qt::Uninitialized},
+                                          {Qt::Uninitialized},
+                                          {Qt::Uninitialized},
+                                          {Qt::Uninitialized},
+                                          {0, 0, 0, 0},
+                                          0,
+                                          {Qt::Uninitialized},
+                                          {Qt::Uninitialized},
+                                          0};
 
 Style::LinkButton _defaultLinkButton = {{Qt::Uninitialized}, {Qt::Uninitialized}, {Qt::Uninitialized}, {Qt::Uninitialized}};
 Style::FlatButton _defaultFlatButton = {
@@ -153,6 +164,7 @@ const Style::IconButton&     reactionIconButtonInMenu(_reactionIconButtonInMenu)
 const Style::IconButton&     reactionIconButton(_reactionIconButton);
 const Style::IconButton&     userReactionIconButton(_userReactionIconButton);
 const Style::IconButton&     recordingAudioIconButton(_recordingAudioIconButton);
+const Style::IconButton&     playAudioIconButton(_playAudioIconButton);
 const Style::FlatButton&     defaultFlatButton(_defaultFlatButton);
 const Style::FlatButton&     stylingButton(_stylingButton);
 const Style::FlatButton&     boldnessButton(_boldnessButton);
@@ -216,76 +228,87 @@ void init_StyleWidgets(int scale)
 
     initPxValues(scale);
 
-    _defaultLoadingSpinner          = {st::spinnerLineColor, 1.5708, 16, px8, px2, px12, 0.0314159, 0.8};
-    _defaultMenu                    = {px2,
-                                       {px4, px4, px4, px4},
-                                       st::windowActiveTextFg,
-                                       {px4, px4, px4, px4},
-                                       {px12, 0, 0},
-                                       st::windowActiveTextFg,
-                                       st::windowActiveTextFg,
-                                       st::windowColorOver,
-                                       st::windowColor,
-                                       st::windowColorOver,
-                                       px100,
-                                       px300};
-    _defaultTitleBarButton          = {st::titleButton, st::titleButtonOver, {":", 0}, px30, px46};
-    _closeButton                    = {st::closeButtonC, st::closeButtonCOver, {":icons/close-w-100", 1}, px30, px46};
-    _restoreButton                  = {st::titleButton, st::titleButtonOver, {":icons/restore-w-100", 1}, px30, px46};
-    _maximizeButton                 = {st::titleButton, st::titleButtonOver, {":icons/max-w-100", 1}, px30, px46};
-    _minimizeButton                 = {st::titleButton, st::titleButtonOver, {":icons/min-w-100.png", 1}, px30, px46};
-    _defaultTitleBar                = {st::windowColor, st::closeButton, st::maximizeButton, st::restoreButton, st::minimizeButton};
-    _defaultIconButton              = {st::windowColor,
-                                       st::windowColorOver,
-                                       st::windowActiveTextFg,
-                                       st::windowActiveTextFg,
-                                       {":icons/max-w-100", 1},
-                                       st::defaultMargins,
-                                       px5,
-                                       st::defaultFont,
-                                       st::defaultFont,
-                                       500};
-    _reactionIconButtonInMenu       = {st::windowColor,
-                                       st::windowColorOver,
-                                       st::windowActiveTextFg,
-                                       st::windowActiveTextFg,
-                                       {":icons/max-w-150", 1},
-                                       {px4, px4, px4, px4},
-                                       px0,
-                                       {px1, 0, 0},
-                                       {px1, 0, 0},
-                                       500};
-    _reactionIconButton             = {st::windowColor,
-                                       st::windowColorOver,
-                                       st::windowActiveTextFg,
-                                       st::windowActiveTextFg,
-                                       {":icons/max-w-100", 1},
-                                       {px4, px4, px4, px4},
-                                       px4,
-                                       {px12, 0, 0},
-                                       {px12, 0, 0},
-                                       500};
-    _userReactionIconButton         = {st::windowColor,
-                                       st::windowColorOver,
-                                       st::windowActiveTextFg,
-                                       st::windowActiveTextFg,
-                                       {":icons/max-w-100", 1},
-                                       {px4, px4, px4, px4},
-                                       px4,
-                                       {px12, 1, 0},
-                                       {px12, 1, 0},
-                                       500};
+    _defaultLoadingSpinner    = {st::spinnerLineColor, 1.5708, 16, px8, px2, px12, 0.0314159, 0.8};
+    _defaultMenu              = {px2,
+                                 {px4, px4, px4, px4},
+                                 st::windowActiveTextFg,
+                                 {px4, px4, px4, px4},
+                                 {px12, 0, 0},
+                                 st::windowActiveTextFg,
+                                 st::windowActiveTextFg,
+                                 st::windowColorOver,
+                                 st::windowColor,
+                                 st::windowColorOver,
+                                 px100,
+                                 px300};
+    _defaultTitleBarButton    = {st::titleButton, st::titleButtonOver, {":", 0}, px30, px46};
+    _closeButton              = {st::closeButtonC, st::closeButtonCOver, {":icons/close-w-100", 1}, px30, px46};
+    _restoreButton            = {st::titleButton, st::titleButtonOver, {":icons/restore-w-100", 1}, px30, px46};
+    _maximizeButton           = {st::titleButton, st::titleButtonOver, {":icons/max-w-100", 1}, px30, px46};
+    _minimizeButton           = {st::titleButton, st::titleButtonOver, {":icons/min-w-100.png", 1}, px30, px46};
+    _defaultTitleBar          = {st::windowColor, st::closeButton, st::maximizeButton, st::restoreButton, st::minimizeButton};
+    _defaultIconButton        = {st::windowColor,
+                                 st::windowColorOver,
+                                 st::windowActiveTextFg,
+                                 st::windowActiveTextFg,
+                                 {":icons/max-w-100", 1},
+                                 st::defaultMargins,
+                                 px5,
+                                 st::defaultFont,
+                                 st::defaultFont,
+                                 500};
+    _reactionIconButtonInMenu = {st::windowColor,
+                                 st::windowColorOver,
+                                 st::windowActiveTextFg,
+                                 st::windowActiveTextFg,
+                                 {":icons/max-w-150", 1},
+                                 {px4, px4, px4, px4},
+                                 px0,
+                                 {px1, 0, 0},
+                                 {px1, 0, 0},
+                                 500};
+    _reactionIconButton       = {st::windowColor,
+                                 st::windowColorOver,
+                                 st::windowActiveTextFg,
+                                 st::windowActiveTextFg,
+                                 {":icons/max-w-100", 1},
+                                 {px4, px4, px4, px4},
+                                 px4,
+                                 {px12, 0, 0},
+                                 {px12, 0, 0},
+                                 500};
+    _userReactionIconButton   = {st::windowColor,
+                                 st::windowColorOver,
+                                 st::windowActiveTextFg,
+                                 st::windowActiveTextFg,
+                                 {":icons/max-w-100", 1},
+                                 {px4, px4, px4, px4},
+                                 px4,
+                                 {px12, 1, 0},
+                                 {px12, 1, 0},
+                                 500};
 
     _recordingAudioIconButton = {st::transparent,
-                                        st::windowColorOver,
-                                        st::windowActiveTextFg,
-                                        st::windowActiveTextFg,
-                                        {":icons/mic-w-300.png", 1},
-                                        {px2, px2, px2, px2},
-                                        px4,
-                                        {px30, 1, 0},
-                                        {px30, 1, 0},
-                                        500};
+                                 st::windowColorOver,
+                                 st::windowActiveTextFg,
+                                 st::windowActiveTextFg,
+                                 {":icons/mic-w-300.png", 1},
+                                 {px2, px2, px2, px2},
+                                 px4,
+                                 {px30, 1, 0},
+                                 {px30, 1, 0},
+                                 500};
+
+    _playAudioIconButton = {st::transparent,
+                            st::windowColorOver,
+                            st::windowActiveTextFg,
+                            st::windowActiveTextFg,
+                            {":icons/play_sound-w-300.png", 1},
+                            {px2, px2, px2, px2},
+                            px4,
+                            {px30, 1, 0},
+                            {px30, 1, 0},
+                            500};
 
     _defaultLinkButton = {st::linkButtonColor, st::linkButtonOverColor, st::defaultFont, st::italicFont};
     _defaultFlatButton = {

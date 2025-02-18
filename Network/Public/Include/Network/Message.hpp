@@ -58,8 +58,6 @@ struct Message
         DirectMessageCreateAnswer,
         MessageReactionRequest,
         MessageReactionAnswer,
-        VoiceMessageRequest,
-        VoiceMessageAnswer,
     };
 
     /**

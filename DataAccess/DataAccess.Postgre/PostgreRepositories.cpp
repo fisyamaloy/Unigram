@@ -139,24 +139,48 @@ std::vector<Network::MessageInfo> MessagesRepository::getMessageHistory(const st
     std::vector<Network::MessageInfo> result;
 
     pTable->changeTable("msgs");
-    auto messageHistoryRow = pTable->Select()
-                                 ->columns({"msgs.msg_id, msgs.sender_id, msgs.send_time, msgs.msg, users.login, users.id"})
-                                 ->join(Utility::SQLJoinType::J_INNER, "channel_msgs", "channel_msgs.msg_id = msgs.msg_id")
-                                 ->join(Utility::SQLJoinType::J_INNER, "users", "users.id = msgs.sender_id")
-                                 ->Where("channel_msgs.channel_id = " + std::to_string(channelID))
-                                 ->execute();
+    auto messageHistoryRow =
+        pTable->Select()
+            ->columns({"msgs.msg_id, msgs.sender_id, msgs.send_time, msgs.msg_type, users.login, COALESCE(text_msgs.msg, "
+                       "voice_msgs.voice_name) AS content, COALESCE(NULL, voice_msgs.duration) AS duration"})
+            ->join(Utility::SQLJoinType::J_INNER, "channel_msgs", "channel_msgs.msg_id = msgs.msg_id")
+            ->join(Utility::SQLJoinType::J_INNER, "users", "users.id = msgs.sender_id")
+            ->join(Utility::SQLJoinType::J_LEFT, "text_msgs", "text_msgs.msg_id = msgs.msg_id AND msgs.msg_type = 'T'")
+            ->join(Utility::SQLJoinType::J_LEFT, "voice_msgs", "voice_msgs.msg_id = msgs.msg_id AND msgs.msg_type = 'A'")
+            ->Where("channel_msgs.channel_id = " + std::to_string(channelID))
+            ->execute();
 
     if (messageHistoryRow.has_value())
     {
-        Network::MessageInfo mi;
-        mi.channelID = channelID;
+        Network::MessageInfo mi = {};
+        mi.channelID            = channelID;
         for (auto i = 0; i < messageHistoryRow.value().size(); ++i)
         {
-            mi.msgID     = messageHistoryRow.value()[i][0].as<std::uint64_t>();
-            mi.senderID  = messageHistoryRow.value()[i][1].as<std::uint64_t>();
-            mi.time      = messageHistoryRow.value()[i][2].as<std::string>();
-            mi.message   = messageHistoryRow.value()[i][3].as<std::string>();
-            mi.userLogin = messageHistoryRow.value()[i][4].as<std::string>();
+            mi.msgID         = messageHistoryRow.value()[i][0].as<std::uint64_t>();
+            mi.senderID      = messageHistoryRow.value()[i][1].as<std::uint64_t>();
+            mi.time          = messageHistoryRow.value()[i][2].as<std::string>();
+            auto msgInfoType = static_cast<Network::MessageInfoType>(messageHistoryRow.value()[i][3].as<std::string>()[0]);
+            mi.userLogin     = messageHistoryRow.value()[i][4].as<std::string>();
+            auto contentRef  = messageHistoryRow.value()[i][5];
+            auto durationRef = messageHistoryRow.value()[i][6];
+
+            switch (msgInfoType)
+            {
+                case Network::MessageInfoType::TEXT:
+                    assert(durationRef.is_null());
+                    mi.setContent(contentRef.as<std::string>());
+                    break;
+                case Network::MessageInfoType::AUDIO:
+                    assert(!durationRef.is_null());
+                    mi.setContent(Network::VoiceMessage{contentRef.as<std::string>(), durationRef.as<std::uint16_t>()});
+                    break;
+                case Network::MessageInfoType::VIDEO:
+                    assert(!durationRef.is_null());
+                    mi.setContent(Network::VideoMessage{contentRef.as<std::string>(), durationRef.as<std::uint16_t>()});
+                    break;
+                default:
+                    break;
+            }
             result.emplace_back(mi);
         }
     }
@@ -189,6 +213,13 @@ Utility::StoringMessageCodes MessagesRepository::storeMessage(const Network::Mes
         return Utility::StoringMessageCodes::FAILED;
     }
 
+    const auto fourthResult = insertContentIntoConentsTable(mi, currentMessageID);
+    if (!fourthResult.has_value())
+    {
+        std::cerr << "Insert message into 'contents' table failed" << std::endl;
+        return Utility::StoringMessageCodes::FAILED;
+    }
+
     return Utility::StoringMessageCodes::SUCCESS;
 }
 
@@ -197,7 +228,7 @@ Utility::DeletingMessageCodes MessagesRepository::deleteMessage(const Network::M
     using Utility::DeletingMessageCodes;
 
     pTable->changeTable("msgs");
-    pTable->Delete()->Where("msg_id=" + std::to_string(mi.msgID))->Or("msg='" + mi.message + "'")->execute();
+    pTable->Delete()->Where("msg_id=" + std::to_string(mi.msgID))->execute();
 
     auto messagesAmountResult = pTable->Select()->columns({"COUNT(*)"})->Where("msg_id=" + std::to_string(mi.msgID))->execute();
     if (messagesAmountResult.value()[0][0].as<std::uint64_t>() == 0)
@@ -210,12 +241,8 @@ Utility::DeletingMessageCodes MessagesRepository::deleteMessage(const Network::M
 
 std::optional<pqxx::result> MessagesRepository::insertMessageIntoMessagesTable(const Network::MessageInfo& mi)
 {
-    std::tuple dataForMsgs
-    {
-        std::pair{"sender_id", mi.senderID}, 
-        std::pair{"send_time", mi.time.c_str()}, 
-        std::pair{"msg", mi.message}
-    };
+    auto       msg_type = static_cast<char>(mi.type);
+    std::tuple dataForMsgs{std::pair{"sender_id", mi.senderID}, std::pair{"send_time", mi.time.c_str()}, std::pair{"msg_type", msg_type}};
 
     pTable->changeTable("msgs");
     return pTable->Insert()->columns(dataForMsgs)->returning({"msg_id"})->execute();
@@ -227,6 +254,51 @@ std::optional<pqxx::result> MessagesRepository::insertIDsIntoChannelMessagesTabl
     std::tuple dataForChannelMsgs{std::pair{"channel_id", channelID}, std::pair{"msg_id", messageID}};
     pTable->changeTable("channel_msgs");
     return pTable->Insert()->columns(dataForChannelMsgs)->returning({"channel_id"})->execute();
+}
+
+std::optional<pqxx::result> MessagesRepository::insertContentIntoConentsTable(const Network::MessageInfo& msi, const std::uint64_t currentMsgID)
+{
+    switch (msi.type)
+    {
+        case Network::MessageInfoType::TEXT:
+        {
+            std::tuple dataForChannelMsgs{std::pair{"msg_id", currentMsgID},
+                                          std::pair{"msg", msi.getContent<Network::TextMessage>().text.c_str()}};
+            pTable->changeTable("text_msgs");
+            return pTable->Insert()->columns(dataForChannelMsgs)->returning({"msg_id"})->execute();
+        }
+        break;
+
+        case Network::MessageInfoType::AUDIO:
+        {
+            const auto voiceMessage = msi.getContent<Network::VoiceMessage>();
+
+            std::tuple dataForVoiceMsgs{std::pair{"msg_id", currentMsgID}, std::pair{"voice_name", voiceMessage.fileName.c_str()},
+                                        std::pair{"duration", voiceMessage.durationSeconds}};
+
+            pTable->changeTable("voice_msgs");
+            return pTable->Insert()->columns(dataForVoiceMsgs)->returning({"msg_id"})->execute();
+        }
+        break;
+
+        case Network::MessageInfoType::VIDEO:
+        {
+            const auto videoMessage = msi.getContent<Network::VideoMessage>();
+
+            std::tuple dataForVideoMsgs{std::pair{"msg_id", currentMsgID}, std::pair{"video_name", videoMessage.fileName.c_str()},
+                                        std::pair{"duration", videoMessage.durationSeconds}};
+
+            pTable->changeTable("video_msgs");
+            return pTable->Insert()->columns(dataForVideoMsgs)->returning({"msg_id"})->execute();
+        }
+        break;
+
+        default:
+        {
+        }
+    }
+
+    return std::nullopt;
 }
 
 std::optional<pqxx::result> MessagesRepository::insertIDIntoMessageReactionsTable(const std::uint64_t messageID)
@@ -249,7 +321,11 @@ Utility::EditingMessageCodes MessagesRepository::editMessage(const Network::Mess
         return Utility::EditingMessageCodes::FAILED;
     }
 
-    pTable->Update()->fields(std::pair{"msg", mi.message})->Where("msg_id=" + std::to_string(mi.msgID))->execute();
+    assert(mi.type == Network::MessageInfoType::TEXT);  // Edit only for text messages
+    pTable->Update()
+        ->fields(std::pair{"msg", mi.getContent<Network::TextMessage>().text.c_str()})
+        ->Where("msg_id=" + std::to_string(mi.msgID))
+        ->execute();
 
     return Utility::EditingMessageCodes::SUCCESS;
 }
@@ -281,10 +357,11 @@ Utility::ReactionMessageCodes MessagesRepository::updateMessageReactions(const N
 {
     using Utility::ReactionMessageCodes;
 
-    const std::vector<std::string> reactionNames = { "likes", "dislikes", "fires", "cats", "smiles" };
+    const std::vector<std::string> reactionNames = {"likes", "dislikes", "fires", "cats", "smiles"};
 
-    auto reactionInfo = std::find_if(mi.reactions.cbegin(), mi.reactions.cend(),
-        [](std::pair<std::uint32_t, std::uint32_t> p) { return p.second == std::numeric_limits<std::uint32_t>::max(); });
+    auto reactionInfo = std::find_if(mi.reactions.cbegin(), mi.reactions.cend(), [](std::pair<std::uint32_t, std::uint32_t> p) {
+        return p.second == std::numeric_limits<std::uint32_t>::max();
+    });
 
     if (reactionInfo == mi.reactions.end())
     {
@@ -292,8 +369,8 @@ Utility::ReactionMessageCodes MessagesRepository::updateMessageReactions(const N
         return ReactionMessageCodes::FAILED;
     }
 
-    std::uint32_t reactionID = reactionInfo->first;
-    std::string reactionName = "NULL";
+    std::uint32_t reactionID   = reactionInfo->first;
+    std::string   reactionName = "NULL";
 
     if (reactionID < reactionNames.size())
     {
@@ -308,48 +385,50 @@ Utility::ReactionMessageCodes MessagesRepository::updateMessageReactions(const N
     auto adapter = pTable->getAdapter();
 
     pTable->changeTable("msg_reactions");
-    std::optional<pqxx::result> userQueryResult =
-        pTable->Select()->columns({ "*" })->Where("msg_id=" + std::to_string(mi.msgID))
-        ->And(std::to_string(mi.senderID) + " = ANY(" + reactionName + ");")->execute();
+    std::optional<pqxx::result> userQueryResult = pTable->Select()
+                                                      ->columns({"*"})
+                                                      ->Where("msg_id=" + std::to_string(mi.msgID))
+                                                      ->And(std::to_string(mi.senderID) + " = ANY(" + reactionName + ");")
+                                                      ->execute();
 
     if (userQueryResult.has_value())
     {
-        adapter->query("UPDATE msg_reactions SET " + reactionName
-            + " = array_remove(" + reactionName + ", " + std::to_string(mi.senderID) + ") WHERE msg_id = " + std::to_string(mi.msgID) + ";");
+        adapter->query("UPDATE msg_reactions SET " + reactionName + " = array_remove(" + reactionName + ", " + std::to_string(mi.senderID) +
+                       ") WHERE msg_id = " + std::to_string(mi.msgID) + ";");
     }
     else
     {
-        adapter->query("UPDATE msg_reactions SET " + reactionName
-            + " = array_append(" + reactionName + ", " + std::to_string(mi.senderID) + ") WHERE msg_id = " + std::to_string(mi.msgID) + ";");
+        adapter->query("UPDATE msg_reactions SET " + reactionName + " = array_append(" + reactionName + ", " + std::to_string(mi.senderID) +
+                       ") WHERE msg_id = " + std::to_string(mi.msgID) + ";");
     }
 
     return ReactionMessageCodes::SUCCESS;
 }
 
-std::vector<Network::ReplyInfo>   RepliesRepository::getReplyHistory(const std::uint64_t channelID)
+std::vector<Network::ReplyInfo> RepliesRepository::getReplyHistory(const std::uint64_t channelID)
 {
-        std::vector<Network::ReplyInfo> result;
+    std::vector<Network::ReplyInfo> result;
 
-        pTable->changeTable("replies");
-        auto replyHistoryRow =
-            pTable->Select()
-                ->columns({"replies.sender_id, replies.msg_id_owner, replies.msg_id_ref, replies.msg, users.login, users.id"})
-                ->join(Utility::SQLJoinType::J_INNER, "channel_replies", "channel_replies.msg_id_owner = replies.msg_id_owner")
-                ->join(Utility::SQLJoinType::J_INNER, "users", "users.id = replies.sender_id")
-                ->Where("channel_replies.channel_id = " + std::to_string(channelID))
-                ->execute();
-        if (replyHistoryRow.has_value())
+    pTable->changeTable("replies");
+    auto replyHistoryRow =
+        pTable->Select()
+            ->columns({"replies.sender_id, replies.msg_id_owner, replies.msg_id_ref, replies.msg, users.login, users.id"})
+            ->join(Utility::SQLJoinType::J_INNER, "channel_replies", "channel_replies.msg_id_owner = replies.msg_id_owner")
+            ->join(Utility::SQLJoinType::J_INNER, "users", "users.id = replies.sender_id")
+            ->Where("channel_replies.channel_id = " + std::to_string(channelID))
+            ->execute();
+    if (replyHistoryRow.has_value())
+    {
+        Network::ReplyInfo ri;
+        ri.channelID = channelID;
+        for (auto i = 0; i < replyHistoryRow.value().size(); ++i)
         {
-            Network::ReplyInfo ri;
-            ri.channelID = channelID;
-            for (auto i = 0; i < replyHistoryRow.value().size(); ++i)
-            {
-                ri.senderID   = replyHistoryRow.value()[i][0].as<std::uint64_t>();
-                ri.msgIdOwner = replyHistoryRow.value()[i][1].as<std::uint64_t>();
-                ri.msgID      = replyHistoryRow.value()[i][2].as<std::uint64_t>();
-                ri.message    = replyHistoryRow.value()[i][3].as<std::string>();
-                ri.userLogin  = replyHistoryRow.value()[i][4].as<std::string>();
-                result.emplace_back(ri);
+            ri.senderID   = replyHistoryRow.value()[i][0].as<std::uint64_t>();
+            ri.msgIdOwner = replyHistoryRow.value()[i][1].as<std::uint64_t>();
+            ri.msgID      = replyHistoryRow.value()[i][2].as<std::uint64_t>();
+            ri.message    = replyHistoryRow.value()[i][3].as<std::string>();
+            ri.userLogin  = replyHistoryRow.value()[i][4].as<std::string>();
+            result.emplace_back(ri);
         }
     }
     return result;
@@ -450,9 +529,9 @@ Utility::DirectMessageStatus DirectMessageRepository::addDirectChat(uint64_t use
     auto minUserId = std::to_string(std::min(user_id, receiverId));
     auto maxUserId = std::to_string(std::max(user_id, receiverId));
     auto result    = adapter->query(
-           "create extension if not exists pgcrypto;\n"
-              "INSERT INTO channels VALUES (DEFAULT, encode(digest(concat(" +
-           minUserId + ", " + maxUserId + "),'sha384'),'base64')," + minUserId + ",2) ON CONFLICT DO NOTHING;");
+        "create extension if not exists pgcrypto;\n"
+           "INSERT INTO channels VALUES (DEFAULT, encode(digest(concat(" +
+        minUserId + ", " + maxUserId + "),'sha384'),'base64')," + minUserId + ",2) ON CONFLICT DO NOTHING;");
 
     result = adapter->query("SELECT id FROM channels WHERE channel_name=encode(digest(concat(" + minUserId + ", " + maxUserId +
                             "),'sha384'),'base64');");

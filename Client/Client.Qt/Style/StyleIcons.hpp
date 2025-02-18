@@ -23,4 +23,6 @@ extern const Style::icon& fireIcon;
 extern const Style::icon& catIcon;
 extern const Style::icon& activeRecordingMicIcon;
 extern const Style::icon& passiveRecordingMicIcon;
+extern const Style::icon& playingVoiceMessageIcon;
+extern const Style::icon& pausedVoiceMessageIcon;
 }  // namespace st

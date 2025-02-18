@@ -1,10 +1,10 @@
-#include "Server.hpp"
+﻿#include "Server.hpp"
 
+#include <fstream>
 #include <future>
 
 #include "DataAccess.Postgre/PostgreRepositoryManager.hpp"
 #include "Network/Primitives.hpp"
-#include <fstream>
 
 using Network::Connection;
 using Network::Message;
@@ -22,6 +22,27 @@ bool Server::onClientConnect(const std::shared_ptr<Connection>& client)
 
 void Server::onClientDisconnect(const std::shared_ptr<Connection>& client) { std::cout << "Removing client [" << client->getID() << "]\n"; }
 
+static bool readFile(const std::string& fileName, std::vector<std::uint8_t>& fileRawData)
+{
+    std::ifstream in(fileName, std::ios::binary | std::ios::ate);
+    if (!in)
+    {
+        return false;
+    }
+
+    std::streamsize fileSize = in.tellg();
+    in.seekg(0, std::ios::beg);
+
+    fileRawData.resize(fileSize);
+    if (fileSize > 0)
+    {
+        in.read(reinterpret_cast<char*>(fileRawData.data()), fileSize);
+    }
+
+    in.close();
+    return true;
+}
+
 void Server::onMessage(const std::shared_ptr<Connection>& client, Message& message)
 {
     using namespace DataAccess;
@@ -29,7 +50,7 @@ void Server::onMessage(const std::shared_ptr<Connection>& client, Message& messa
     const auto maxDelay    = std::chrono::milliseconds(300);
     const auto currentTime = std::chrono::system_clock::now();
     const auto delay       = std::chrono::milliseconds(
-              std::abs(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - message.mHeader.mTimestamp).count()));
+        std::abs(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - message.mHeader.mTimestamp).count()));
 
     if (delay > maxDelay) message.mHeader.mTimestamp = currentTime;
 
@@ -85,6 +106,23 @@ void Server::onMessage(const std::shared_ptr<Connection>& client, Message& messa
             {
                 auto messageHistory = future.get();
 
+                std::erase_if(messageHistory, [](Network::MessageInfo& messageInfo) {
+                    if (messageInfo.type == Network::MessageInfoType::TEXT)
+                    {
+                        return false;
+                    }
+
+                    const auto&               voiceInfo = messageInfo.getContent<Network::VoiceMessage>();
+                    std::vector<std::uint8_t> rawVoiceData;
+                    bool                      fileRead = readFile(voiceInfo.fileName, rawVoiceData);
+                    if (!fileRead)
+                    {
+                        return true;
+                    }
+                    messageInfo.setContent(Network::VoiceMessage{voiceInfo.fileName, voiceInfo.durationSeconds, std::move(rawVoiceData)});
+                    return false;
+                });
+
                 msg.mBody = std::make_any<std::vector<Network::MessageInfo>>(messageHistory);
                 client->send(msg);
             }
@@ -99,9 +137,23 @@ void Server::onMessage(const std::shared_ptr<Connection>& client, Message& messa
         {
             auto mi     = std::any_cast<Network::MessageInfo>(message.mBody);
             mi.senderID = client->getUserID();
-            mi.message  = Utility::removeSpaces(mi.message);
-            mi.time = Utility::getTimeNow();
 
+            if (mi.type == Network::MessageInfoType::TEXT)
+            {
+                mi.setContent(Utility::removeSpaces(mi.getContent<Network::TextMessage>().text));
+            }
+            else if (mi.type == Network::MessageInfoType::AUDIO)
+            {
+                auto& voiceInfo = mi.getContent<Network::VoiceMessage>();
+                std::ofstream out(voiceInfo.fileName, std::ios_base::binary);
+                if (out)
+                {
+                    out.write(reinterpret_cast<const char*>(voiceInfo.data.data()), voiceInfo.data.size());
+                    out.close();
+                }
+            }
+
+            mi.time     = Utility::getTimeNow();
             auto future = mPostgreManager->pushRequest(&IMessagesRepository::storeMessage, fmt(mi));
 
             Network::Message answerForClient;
@@ -179,12 +231,12 @@ void Server::onMessage(const std::shared_ptr<Connection>& client, Message& messa
             client->send(answerForClient);
         }
         break;
-        
+
         case Network::Message::MessageType::MessageReactionRequest:
         {
-            auto messageInfo = std::any_cast<Network::MessageInfo>(message.mBody);
+            auto messageInfo     = std::any_cast<Network::MessageInfo>(message.mBody);
             messageInfo.senderID = client->getUserID();
-            
+
             auto future = mPostgreManager->pushRequest(&IMessagesRepository::updateMessageReactions, fmt(messageInfo));
 
             Network::Message answerForClient;
@@ -341,27 +393,7 @@ void Server::onMessage(const std::shared_ptr<Connection>& client, Message& messa
             client->send(messageToClient);
         }
         break;
-        case Network::Message::MessageType::VoiceMessageRequest:
-        {
-            auto vmi = std::any_cast<Network::VoiceMessageInfo>(message.mBody);
-
-            std::ofstream out(vmi.fileName, std::ios_base::binary);
-            if (out)
-            {
-                out.write(reinterpret_cast<const char*>(vmi.messageRawData.data()), vmi.messageRawData.size());
-                out.close();
-            }
-
-            //auto result = mPostgreManager->pushRequest(&IDirectMessageRepository::addDirectChat, fmt(client->getUserID()), fmt(secondUser));
-
-            Network::Message messageToClient;
-            //messageToClient.mHeader.mMessageType = Network::Message::MessageType::VoiceMessageAnswer;
-
-            //messageToClient.mBody = std::make_any<Utility::DirectMessageStatus>(result.get());
-            //client->send(messageToClient);
-        }
-        break;
-
+        
         default:
         {
             std::cerr << "Unknown command received\n";

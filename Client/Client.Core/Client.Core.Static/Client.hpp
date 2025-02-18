@@ -1,9 +1,10 @@
 #pragma once
 
+#include <filesystem>
+
 #include "Network/Connection.hpp"
 #include "Network/Message.hpp"
 #include "Network/SafeQueue.hpp"
-#include <filesystem>
 
 namespace Network
 {
@@ -93,7 +94,7 @@ public:
      * @param message Message
      * @param channelID Channel ID
      */
-    void storeMessage(const std::string& message, uint64_t channelID) const;
+    void storeTextMessage(const std::string& message, uint64_t channelID) const;
     /**
      * @brief Send a reply to server
      * @param string Message
@@ -123,7 +124,7 @@ public:
      */
     void userMessageReaction(const std::uint64_t messageID, const std::uint32_t reactionID) const;
 
-    void storeVoiceMessage(const std::filesystem::path& filepath, const uint64_t channelID) const;
+    void storeVoiceMessage(const std::filesystem::path& filepath, const uint64_t channelID, const std::uint16_t duration) const;
 
 protected:
     /// Disconnect handler
@@ -168,8 +169,6 @@ protected:
     /// Reaction Answer handler
     virtual void onMessageReactionAnswer(Utility::ReactionMessageCodes reactionState);
 
-    virtual void onVoiceMessageAnswer(Utility::VoiceMessageCodes voiceMessageState);
-    
 private:
     asio::io_context _context;
     std::thread      _contextThread;

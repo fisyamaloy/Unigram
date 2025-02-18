@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Handler.hpp"
 
@@ -156,14 +156,6 @@ public:
 
                 case Message::MessageType::DirectMessageCreateAnswer:
                     state = processOutcomingMessageBody<Utility::DirectMessageStatus>(bodyBuffer, message.mBody);
-                    break;
-
-                case Message::MessageType::VoiceMessageRequest:
-                    state = processOutcomingMessageBody<VoiceMessageInfo>(bodyBuffer, message.mBody);
-                    break;
-
-                case Message::MessageType::VoiceMessageAnswer:
-                    state = processOutcomingMessageBody<Utility::VoiceMessageCodes>(bodyBuffer, message.mBody);
                     break;
 
                 default:
@@ -351,14 +343,6 @@ public:
                 state = processIncomingMessageBody<Utility::DirectMessageStatus>(buffer, message);
                 break;
             }
-
-            case Message::MessageType::VoiceMessageRequest:
-                state = processIncomingMessageBody<VoiceMessageInfo>(buffer, message);
-                break;
-
-            case Message::MessageType::VoiceMessageAnswer:
-                state = processIncomingMessageBody<Utility::VoiceMessageCodes>(buffer, message);
-                break;
 
             default:
                 break;

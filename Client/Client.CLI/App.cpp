@@ -63,7 +63,7 @@ void App::onMessageHistoryAnswer(const std::vector<Network::MessageInfo>& messag
 {
     for (const auto& item : messages)
     {
-        std::cout << item.message << '\n';
+        std::cout << item.getContent<Network::TextMessage>().text << '\n';
     }
 }
 

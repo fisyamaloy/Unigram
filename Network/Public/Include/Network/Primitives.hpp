@@ -1,11 +1,13 @@
-#pragma once
+﻿#pragma once
 
 #include <Utility/Utility.hpp>
+#include <cassert>
 #include <chrono>
 #include <cstdint>
 #include <cstring>
 #include <map>
 #include <string>
+#include <variant>
 
 namespace Network
 {
@@ -162,17 +164,58 @@ void serialize(Archive& ar, Network::RegistrationInfo& o)
     ar & o.email & o.login & o.passwordHash;
 }
 
+enum class MessageInfoType : std::uint8_t
+{
+    TEXT  = 'T',
+    AUDIO = 'A',
+    VIDEO = 'V',
+};
+
+struct TextMessage
+{
+    std::string text;
+
+    template <typename Archive>
+    void serialize(Archive& ar)
+    {
+        ar & text;
+    }
+};
+
+struct VoiceMessage
+{
+    std::string          fileName;
+    std::uint16_t        durationSeconds;
+    std::vector<uint8_t> data;
+
+    template <typename Archive>
+    void serialize(Archive& ar)
+    {
+        ar & fileName & durationSeconds & data;
+    }
+};
+
+struct VideoMessage
+{
+    std::string          fileName;
+    std::uint16_t        durationSeconds;
+    std::vector<uint8_t> data;
+
+    template <typename Archive>
+    void serialize(Archive& ar)
+    {
+        ar & fileName & durationSeconds & data;
+    }
+};
+
 /**
  * @brief The MessageInfo struct
- * @details Message Info contains channel ID, message, message ID,
- *          sender ID, recipient ID and time.
+ * @details Message Info contains information about user message and his type.
  */
 struct MessageInfo
 {
     /// channel ID uint64_t variable
     std::uint64_t channelID;
-    /// message string variable
-    std::string message;
     /// msg ID uint64_t variable
     std::uint64_t msgID;
     /// sender ID uint64_t variable
@@ -186,32 +229,78 @@ struct MessageInfo
     /// reactions (reaction_id, reaction_count)
     std::map<std::uint32_t, std::uint32_t> reactions = {};
 
+    std::variant<TextMessage, VoiceMessage, VideoMessage> content;
+
+    MessageInfoType type = MessageInfoType::TEXT;
+
     /// Default MessageIndo constructor
     MessageInfo() = default;
     /// MessageIndo constructor with initializing list
-    explicit MessageInfo(const uint64_t channelID, const std::string& text) : channelID(channelID), message(text) {}
+    MessageInfo(const uint64_t channelID, std::string text)
+    {
+        this->channelID = channelID;
+        this->content   = TextMessage{std::move(text)};
+        this->type      = MessageInfoType::TEXT;
+    }
+
+    MessageInfo(const std::uint64_t channelID, std::string fileName, std::vector<std::uint8_t> data, const std::uint16_t duration,
+                MessageInfoType type)
+    {
+        this->channelID = channelID;
+        this->type      = type;
+
+        if (type == MessageInfoType::AUDIO)
+        {
+            this->content = VoiceMessage{std::move(fileName), duration, std::move(data)};
+        }
+        else if (type == MessageInfoType::VIDEO)
+        {
+            this->content = VideoMessage{std::move(fileName), duration, std::move(data)};
+        }
+    }
+
     /// Default MessageIndo copy constructor
     MessageInfo(const MessageInfo&) = default;
     /// Default MessageIndo destructor
     ~MessageInfo() = default;
 
+    template <typename T>
+    const T& getContent() const
+    {
+        assert(std::holds_alternative<T>(content) && "Invalid type access in getContent");
+        return std::get<T>(content);
+    }
+
+    template <typename T>
+    void setContent(T newContent)
+    {
+        if constexpr (std::is_same_v<T, std::string>)
+        {
+            content = std::move(TextMessage{newContent});
+            type    = MessageInfoType::TEXT;
+        }
+        else if constexpr (std::is_same_v<T, VoiceMessage>)
+        {
+            content = std::move(newContent);
+            type    = MessageInfoType::AUDIO;
+        }
+        else if constexpr (std::is_same_v<T, VideoMessage>)
+        {
+            content = std::move(newContent);
+            type    = MessageInfoType::VIDEO;
+        }
+    }
+
     /// Operator == to compare Message Info
     friend bool operator==(const MessageInfo& first, const MessageInfo& second)
     {
-        return first.message == second.message && first.channelID == second.channelID && first.time == second.time &&
-               first.msgID == second.msgID && first.userLogin == second.userLogin;
+        return first.channelID == second.channelID && first.time == second.time && first.msgID == second.msgID &&
+               first.userLogin == second.userLogin;
     }
 
     /// Operator < to compare MessageInfo
     friend bool operator<(const MessageInfo& lhs, const MessageInfo& rhs) { return lhs.time < rhs.time; }
 };
-
-/// Serialize method for serialize Message Info for each field
-template <typename Archive>
-void serialize(Archive& ar, Network::MessageInfo& o)
-{
-    ar & o.channelID & o.senderID & o.msgID & o.message & o.reactions & o.time & o.userLogin;
-}
 
 /**
  * @brief The ReplyInfo struct
@@ -255,39 +344,6 @@ template <typename Archive>
 void serialize(Archive& ar, Network::ReplyInfo& o)
 {
     ar & o.channelID & o.message & o.msgID & o.senderID & o.msgIdOwner & o.userLogin;
-}
-
-struct VoiceMessageInfo
-{
-    std::string               fileName;
-    std::vector<std::uint8_t> messageRawData;
-    std::uint64_t             channelID;
-    std::uint64_t             senderID;
-    std::string               userLogin;
-
-    VoiceMessageInfo() = default;
-    VoiceMessageInfo(std::string fileName, std::vector<std::uint8_t> messageRawData, const std::uint64_t channelID,
-                     const std::uint64_t senderID, std::string userLogin)
-        : fileName(std::move(fileName)),
-          messageRawData(std::move(messageRawData)),
-          channelID(channelID),
-          senderID(senderID),
-          userLogin(std::move(userLogin))
-    {
-    }
-    ~VoiceMessageInfo() = default;
-
-    friend bool operator==(const VoiceMessageInfo& first, const VoiceMessageInfo& second)
-    {
-        return first.channelID == second.channelID && first.senderID == second.senderID && first.fileName == second.fileName &&
-               first.messageRawData.size() == second.messageRawData.size() && first.userLogin == second.userLogin;
-    }
-};
-
-template <typename Archive>
-void serialize(Archive& ar, Network::VoiceMessageInfo& o)
-{
-    ar & o.fileName & o.messageRawData & o.channelID & o.senderID & o.userLogin;
 }
 
 }  // namespace Network

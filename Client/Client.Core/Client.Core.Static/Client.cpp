@@ -144,16 +144,35 @@ void Client::askForReplyHistory(uint64_t channelID) const
     send(message);
 }
 
-void Client::storeMessage(const std::string& message, const uint64_t channelID) const
+void Client::storeTextMessage(const std::string& message, const uint64_t channelID) const
 {
     Network::Message networkMessage;
     networkMessage.mHeader.mMessageType = MessageType::MessageStoreRequest;
 
     Network::MessageInfo mi;
-    mi.message   = message;
+    mi.setContent(message);
     mi.channelID = channelID;
 
     networkMessage.mBody = std::make_any<Network::MessageInfo>(mi);
+    send(networkMessage);
+}
+
+void Client::storeVoiceMessage(const std::filesystem::path& filepath, const uint64_t channelID, const std::uint16_t duration) const
+{
+    std::ifstream mp3File(filepath.c_str(), std::ios::binary);
+    if (!mp3File)
+    {
+        std::cerr << "Error: unable to open: " << filepath << '\n';
+        return;
+    }
+    std::vector<uint8_t> buffer(std::istreambuf_iterator<char>(mp3File), {});
+    mp3File.close();
+
+    Network::MessageInfo mi(channelID, filepath.filename().string(), buffer, duration, Network::MessageInfoType::AUDIO);
+
+    Network::Message networkMessage;
+    networkMessage.mHeader.mMessageType = Network::MessageType::MessageStoreRequest;
+    networkMessage.mBody                = std::make_any<Network::MessageInfo>(mi);
     send(networkMessage);
 }
 
@@ -215,10 +234,11 @@ void Client::userMessageDelete(const uint64_t messageID) const
     send(message);
 }
 
+// TODO:: Send id!!!
 void Client::userMessageDelete(const std::string& messageText) const
 {
     Network::MessageInfo mi;
-    mi.message = messageText;
+    mi.setContent(messageText);
 
     Network::Message message;
     message.mHeader.mMessageType = MessageType::MessageDeleteRequest;
@@ -279,28 +299,6 @@ void Client::userMessageReaction(const std::uint64_t messageID, const std::uint3
     Network::Message message;
     message.mHeader.mMessageType = MessageType::MessageReactionRequest;
     message.mBody                = std::make_any<Network::MessageInfo>(mi);
-
-    send(message);
-}
-
-void Client::storeVoiceMessage(const std::filesystem::path& filepath, const uint64_t channelID) const
-{
-    std::ifstream mp3File(filepath.c_str(), std::ios::binary);
-    if (!mp3File)
-    {
-        std::cerr << "Error: unable to open: " << filepath << '\n';
-        return;
-    }
-    std::vector<uint8_t> buffer(std::istreambuf_iterator<char>(mp3File), {});
-
-    Network::VoiceMessageInfo vmi;
-    vmi.channelID      = channelID;
-    vmi.fileName       = filepath.filename().string();
-    vmi.messageRawData = std::move(buffer);
-
-    Network::Message message;
-    message.mHeader.mMessageType = MessageType::VoiceMessageRequest;
-    message.mBody                = std::make_any<Network::VoiceMessageInfo>(vmi);
 
     send(message);
 }
@@ -438,12 +436,6 @@ void Client::loop()
                 onDirectMessageCreateAnswer(directMessageCreateAnswer);
             }
             break;
-            case MessageType::VoiceMessageAnswer:
-            {
-                auto voiceMsgAnswer = std::any_cast<Utility::VoiceMessageCodes>(message.mBody);
-                onVoiceMessageAnswer(voiceMsgAnswer);
-            }
-            break;
 
             default:
                 std::cerr << "[Client][Warning] unimplemented[" << uint32_t(message.mHeader.mMessageType) << "]\n";
@@ -504,12 +496,6 @@ void Client::onUserMessageDeleteAnswer(const Utility::DeletingMessageCodes delet
 void Client::onMessageReactionAnswer(const Utility::ReactionMessageCodes reactionState)
 {
     (void)(reactionState);
-    std::cerr << "[Client][Warning] onMessageReaction answer is not implemented\n";
-}
-
-void Client::onVoiceMessageAnswer(Utility::VoiceMessageCodes voiceMessageState)
-{
-    (void)(voiceMessageState);
     std::cerr << "[Client][Warning] onMessageReaction answer is not implemented\n";
 }
 

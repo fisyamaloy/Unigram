@@ -84,20 +84,6 @@ void ConnectionManager::onMessageReactionAnswer(const Utility::ReactionMessageCo
     emit ReceiverManager::instance() -> onMessageReactionAnswer(reactionCode);
 }
 
-void ConnectionManager::onVoiceMessageAnswer(const Utility::VoiceMessageCodes voiceMessageCode)
-{
-    if (voiceMessageCode == Utility::VoiceMessageCodes::SUCCESS)
-    {
-        std::cout << "SUCCES: Voice message sent\n";
-    }
-    else
-    {
-        std::cout << "FAILURE: voice message error\n";
-    }
-    qRegisterMetaType<Utility::VoiceMessageCodes>("Utility::VoiceMessageCodes");
-    emit ReceiverManager::instance() -> onVoiceMessageAnswer(voiceMessageCode);
-}
-
 void ConnectionManager::onRegistrationAnswer(Utility::RegistrationCodes registrationCode)
 {
     qRegisterMetaType<Utility::RegistrationCodes>("Utility::RegistrationCodes");

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #ifdef _WIN32
 #ifdef _WIN32_WINNT
@@ -81,14 +81,14 @@ private:
      */
     void writeHeader()
     {
-        yas::shared_buffer bodyBuffer;
+        auto bodyBuffer = std::make_shared<yas::shared_buffer>();
 
         SerializationHandler handler;
         handler.setNext(new CompressionHandler())->setNext(new EncryptionHandler());
-        MessageProcessingState result = handler.handleOutcomingMessage(mOutcomingMessagesQueue.front(), bodyBuffer);
+        MessageProcessingState result = handler.handleOutcomingMessage(mOutcomingMessagesQueue.front(), *bodyBuffer);
 
         Network::Message::MessageHeader outcomingMessageHeader = mOutcomingMessagesQueue.front().mHeader;
-        outcomingMessageHeader.mBodySize                       = static_cast<uint32_t>(bodyBuffer.size);
+        outcomingMessageHeader.mBodySize                       = static_cast<uint32_t>(bodyBuffer->size);
 
         if (result == MessageProcessingState::SUCCESS)
         {
@@ -97,7 +97,7 @@ private:
                 {
                     if (mOutcomingMessagesQueue.front().mBody.has_value())
                     {
-                        writeBody(bodyBuffer);
+                        writeBody(bodyBuffer, bodyBuffer->size);
                     }
                     else
                     {
@@ -132,16 +132,28 @@ private:
      * "[connection id] Write Body Fail." is displayed.
      * @param buffer - buffer that contatins sent message body
      */
-    void writeBody(yas::shared_buffer buffer)
+    void writeBody(std::shared_ptr<yas::shared_buffer> buffer, size_t totalSize, size_t bytesSent = 0)
     {
-        const auto writeBodyHandler = [this](std::error_code error) {
+        auto writeBodyHandler = std::make_shared<std::function<void(std::error_code, size_t)>>();
+
+        *writeBodyHandler = [this, buffer, totalSize, bytesSent, writeBodyHandler](std::error_code error, size_t bytesTransferred) mutable {
             if (!error)
             {
-                mOutcomingMessagesQueue.pop_front();
-
-                if (!mOutcomingMessagesQueue.empty())
+                size_t newBytesSent = bytesSent + bytesTransferred;
+                if (newBytesSent < totalSize)
                 {
-                    writeHeader();
+                    asio::async_write(
+                        mSocket, asio::buffer(buffer->data.get() + newBytesSent, totalSize - newBytesSent),
+                        asio::bind_executor(_writeStrand, std::bind(*writeBodyHandler, std::placeholders::_1, std::placeholders::_2)));
+                }
+                else
+                {
+                    mOutcomingMessagesQueue.pop_front();
+
+                    if (!mOutcomingMessagesQueue.empty())
+                    {
+                        writeHeader();
+                    }
                 }
             }
             else
@@ -151,8 +163,8 @@ private:
             }
         };
 
-        asio::async_write(mSocket, asio::buffer(buffer.data.get(), buffer.size), 
-                            asio::bind_executor(_writeStrand, std::bind(writeBodyHandler, std::placeholders::_1)));
+        asio::async_write(mSocket, asio::buffer(buffer->data.get(), totalSize),
+                          asio::bind_executor(_writeStrand, std::bind(*writeBodyHandler, std::placeholders::_1, std::placeholders::_2)));
     }
 
     /**
@@ -204,19 +216,33 @@ private:
      */
     void readBody(size_t bodySize)
     {
-        yas::shared_buffer buffer;
-        buffer.resize(bodySize);
+        auto buffer = std::make_shared<yas::shared_buffer>();
+        buffer->resize(bodySize);
+        auto bytesReceived = std::make_shared<size_t>(0);
 
-        const auto readBodyHandler = [this, buffer](std::error_code error) {
+        std::function<void(std::error_code, size_t)> readBodyHandler;
+        readBodyHandler = [this, buffer, bytesReceived, bodySize, &readBodyHandler](std::error_code error,
+                                                                                    size_t          bytesTransferred) mutable {
             if (!error)
             {
-                EncryptionHandler handler;
-                handler.setNext(new CompressionHandler())->setNext(new SerializationHandler());
-                MessageProcessingState result = handler.handleIncomingMessageBody(buffer, mMessageBuffer);
+                *bytesReceived += bytesTransferred;
 
-                if (result == MessageProcessingState::SUCCESS)
+                if (*bytesReceived < bodySize)
                 {
-                    addToIncomingMessageQueue();
+                    asio::async_read(
+                        mSocket, asio::buffer(buffer->data.get() + *bytesReceived, bodySize - *bytesReceived),
+                        asio::bind_executor(_readStrand, std::bind(readBodyHandler, std::placeholders::_1, std::placeholders::_2)));
+                }
+                else
+                {
+                    EncryptionHandler handler;
+                    handler.setNext(new CompressionHandler())->setNext(new SerializationHandler());
+                    MessageProcessingState result = handler.handleIncomingMessageBody(*buffer, mMessageBuffer);
+
+                    if (result == MessageProcessingState::SUCCESS)
+                    {
+                        addToIncomingMessageQueue();
+                    }
                 }
             }
             else
@@ -226,8 +252,9 @@ private:
             }
         };
 
-        asio::async_read(mSocket, asio::buffer(buffer.data.get(), buffer.size),
-                            asio::bind_executor(_readStrand, std::bind(readBodyHandler, std::placeholders::_1)));
+        // Запускаем чтение
+        asio::async_read(mSocket, asio::buffer(buffer->data.get(), bodySize),
+                         asio::bind_executor(_readStrand, std::bind(readBodyHandler, std::placeholders::_1, std::placeholders::_2)));
     }
 
     /**
