@@ -1,9 +1,11 @@
-#include "ChatHistory.hpp"
+﻿#include "ChatHistory.hpp"
 
 #include <QCoreApplication>
 #include <QDebug>
 #include <QPainter>
 #include <QtEvents>
+
+#include "VoiceMessageWidget.hpp"
 
 ChatHistory::ChatHistory(QWidget* parent) : QWidget(parent), _messageList()
 {
@@ -62,8 +64,10 @@ void ChatHistory::addMessage(const Network::MessageInfo& messageInfo)
     {
         if (copy->reactions != messageInfo.reactions)
         {
-            auto widgetCopy = std::find_if(_messageList.begin(), _messageList.end(), [messageInfo](const std::unique_ptr<MessageWidget>& mw)
-                                        { return mw->isTheMessage(messageInfo.msgID, messageInfo.senderID); });
+            auto widgetCopy =
+                std::find_if(_messageList.begin(), _messageList.end(), [messageInfo](const std::unique_ptr<MessageWidget>& mw) {
+                    return mw->isTheMessage(messageInfo.msgID, messageInfo.senderID);
+                });
 
             history->setMinimumHeight(history->minimumHeight() - (*widgetCopy)->height() - 10);
 
@@ -78,9 +82,19 @@ void ChatHistory::addMessage(const Network::MessageInfo& messageInfo)
 
     auto time = QDateTime::fromString(QString::fromStdString(messageInfo.time), "yyyy-MM-dd hh:mm:ss");
 
-    auto msg = new MessageWidget(history, QString::fromStdString(messageInfo.message), messageInfo.senderID, messageInfo.msgID,
-                                 time.toMSecsSinceEpoch(), QString::fromStdString(messageInfo.userLogin));
+    MessageWidget* msg = nullptr;
 
+    if (messageInfo.type == Network::MessageInfoType::TEXT)
+    {
+        msg = new MessageWidget(history, QString::fromStdString(messageInfo.getContent<Network::TextMessage>().text), messageInfo.senderID,
+                                messageInfo.msgID, time.toMSecsSinceEpoch(), QString::fromStdString(messageInfo.userLogin));
+    }
+    else
+    {
+        const auto& voiceMessage = messageInfo.getContent<Network::VoiceMessage>();
+        msg = new VoiceMessageWidget(history, QString::fromStdString(voiceMessage.fileName), QString::fromStdString(messageInfo.userLogin),
+                                     messageInfo.senderID, messageInfo.msgID, time.toMSecsSinceEpoch(), voiceMessage.durationSeconds);
+    }
     msg->setReactionMap(messageInfo.reactions);
     msg->show();
     msg->resize(history->width() - 25, msg->expectedHeight());
@@ -89,8 +103,8 @@ void ChatHistory::addMessage(const Network::MessageInfo& messageInfo)
     _messageList.push_back(std::unique_ptr<MessageWidget>(msg));
     _messages.push_back(messageInfo);
 
-    std::sort(_messageList.begin(), _messageList.end(), [](const std::unique_ptr<MessageWidget>& lhs, const std::unique_ptr<MessageWidget>& rhs)
-        { return *lhs < *rhs;  });
+    std::sort(_messageList.begin(), _messageList.end(),
+              [](const std::unique_ptr<MessageWidget>& lhs, const std::unique_ptr<MessageWidget>& rhs) { return *lhs < *rhs; });
 
     connect(msg, &MessageWidget::createReplySignal, this, &ChatHistory::createReplySignal);
 
@@ -132,10 +146,10 @@ void ChatHistory::resizeEvent(QResizeEvent* event)
 void ChatHistory::updateLayout(bool beenResized)
 {
     if (_messageList.empty()) return;
-    auto bottom = _scrollArea->scrollHeight();
 
-    int diff = _scrollArea->scrollTop();
-    int y    = diff;
+    auto bottom = _scrollArea->scrollHeight();
+    int  diff   = _scrollArea->scrollTop();
+    int  y      = diff;
 
     if (_left >= 0)
     {

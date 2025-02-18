@@ -9,37 +9,37 @@ ReceiverManager::ReceiverManager() { self = this; }
 void ConnectionManager::onServerAccepted()
 {
     std::cout << "Server Accepted Connection\n";
-    emit ReceiverManager::instance()->onServerAccepted();
+    emit ReceiverManager::instance() -> onServerAccepted();
 }
 
 void ConnectionManager::onServerPing(double timestamp)
 {
     std::cout << "Ping: " << timestamp << "\n";
-    emit ReceiverManager::instance()->onServerPing(timestamp);
+    emit ReceiverManager::instance() -> onServerPing(timestamp);
 }
 
 void ConnectionManager::onServerMessage(const uint64_t clientId)
 {
     std::cout << "Hello from [" << clientId << "]\n";
-    emit ReceiverManager::instance()->onServerMessage(clientId);
+    emit ReceiverManager::instance() -> onServerMessage(clientId);
 }
 
 void ConnectionManager::onChannelListRequest(const std::vector<Network::ChannelInfo>& channels)
 {
     qRegisterMetaType<std::vector<Network::ChannelInfo>>("std::vector<Network::ChannelInfo>");
-    emit ReceiverManager::instance()->onChannelListRequest(channels);
+    emit ReceiverManager::instance() -> onChannelListRequest(channels);
 }
 
 void ConnectionManager::onMessageHistoryAnswer(const std::vector<Network::MessageInfo>& messages)
 {
     qRegisterMetaType<std::vector<Network::MessageInfo>>("std::vector<Network::MessageInfo>");
-    emit ReceiverManager::instance()->onMessageHistoryAnswer(messages);
+    emit ReceiverManager::instance() -> onMessageHistoryAnswer(messages);
 }
 
 void ConnectionManager::onReplyHistoryAnswer(const std::vector<Network::ReplyInfo>& replies)
 {
     qRegisterMetaType<std::vector<Network::ReplyInfo>>("std::vector<Network::ReplyInfo>");
-    emit ReceiverManager::instance()->onReplyHistoryAnswer(replies);
+    emit ReceiverManager::instance() -> onReplyHistoryAnswer(replies);
 }
 
 void ConnectionManager::onMessageStoreAnswer(Utility::StoringMessageCodes storingMessageCode)
@@ -53,7 +53,7 @@ void ConnectionManager::onMessageStoreAnswer(Utility::StoringMessageCodes storin
         std::cout << "FAILED sending" << std::endl;
     }
     qRegisterMetaType<Utility::StoringMessageCodes>("Utility::StoringMessageCodes");
-    emit ReceiverManager::instance()->onMessageStoreAnswer(storingMessageCode);
+    emit ReceiverManager::instance() -> onMessageStoreAnswer(storingMessageCode);
 }
 
 void ConnectionManager::onReplyStoreAnswer(Utility::StoringReplyCodes storingReplyCode)
@@ -67,7 +67,7 @@ void ConnectionManager::onReplyStoreAnswer(Utility::StoringReplyCodes storingRep
         std::cout << "FAILED sending" << std::endl;
     }
     qRegisterMetaType<Utility::StoringReplyCodes>("Utility::StoringReplyCodes");
-    emit ReceiverManager::instance()->onReplyStoreAnswer(storingReplyCode);
+    emit ReceiverManager::instance() -> onReplyStoreAnswer(storingReplyCode);
 }
 
 void ConnectionManager::onMessageReactionAnswer(const Utility::ReactionMessageCodes reactionCode)
@@ -81,13 +81,13 @@ void ConnectionManager::onMessageReactionAnswer(const Utility::ReactionMessageCo
         std::cout << "Reaction update FAILED\n";
     }
     qRegisterMetaType<Utility::ReactionMessageCodes>("Utility::ReactionMessageCodes");
-    emit ReceiverManager::instance()->onMessageReactionAnswer(reactionCode);
+    emit ReceiverManager::instance() -> onMessageReactionAnswer(reactionCode);
 }
 
 void ConnectionManager::onRegistrationAnswer(Utility::RegistrationCodes registrationCode)
 {
     qRegisterMetaType<Utility::RegistrationCodes>("Utility::RegistrationCodes");
-    emit ReceiverManager::instance()->onRegistrationAnswer(registrationCode);
+    emit ReceiverManager::instance() -> onRegistrationAnswer(registrationCode);
 }
 
 void ConnectionManager::onLoginAnswer(bool success)
@@ -100,7 +100,7 @@ void ConnectionManager::onLoginAnswer(bool success)
     {
         loginState = LoginState::FAILED;
     }
-    emit ReceiverManager::instance()->onLoginAnswer(success);
+    emit ReceiverManager::instance() -> onLoginAnswer(success);
 }
 
 void ConnectionManager::onUserMessageDeleteAnswer(const Utility::DeletingMessageCodes deletingCode)
@@ -118,7 +118,7 @@ void ConnectionManager::onUserMessageDeleteAnswer(const Utility::DeletingMessage
         std::cout << "UNKNOWN deleting message code" << std::endl;
     }
 
-    emit ReceiverManager::instance()->onUserMessageDeleteAnswer(deletingCode);
+    emit ReceiverManager::instance() -> onUserMessageDeleteAnswer(deletingCode);
 }
 
 void ConnectionManager::onChannelLeaveAnswer(Utility::ChannelLeaveCodes ChannelLeaveCode)
@@ -136,7 +136,7 @@ void ConnectionManager::onChannelLeaveAnswer(Utility::ChannelLeaveCodes ChannelL
         std::cout << "CHANNEL NOT FOUND" << std::endl;
     }
     qRegisterMetaType<Utility::ChannelLeaveCodes>("Utility::ChannelLeaveCodes");
-    emit ReceiverManager::instance()->onChannelLeaveAnswer(ChannelLeaveCode);
+    emit ReceiverManager::instance() -> onChannelLeaveAnswer(ChannelLeaveCode);
 }
 
 void ConnectionManager::onChannelSubscribingAnswer(const Utility::ChannelSubscribingCodes subscribingChannelCode)
@@ -150,13 +150,13 @@ void ConnectionManager::onChannelSubscribingAnswer(const Utility::ChannelSubscri
         std::cout << "FAILED SUBSCRIBING" << std::endl;
     }
     qRegisterMetaType<Utility::ChannelSubscribingCodes>("Utility::ChannelSubscribingCodes");
-    emit ReceiverManager::instance()->onChannelSubscriptionAnswer(subscribingChannelCode);
+    emit ReceiverManager::instance() -> onChannelSubscriptionAnswer(subscribingChannelCode);
 }
 
 void ConnectionManager::onChannelSubscribingListAnswer(const std::vector<uint64_t> subscribingChannelList)
 {
     qRegisterMetaType<std::vector<uint64_t>>("std::vector<uint64_t>");
-    emit ReceiverManager::instance()->onChannelSubscriptionListAnswer(subscribingChannelList);
+    emit ReceiverManager::instance() -> onChannelSubscriptionListAnswer(subscribingChannelList);
 }
 
 void ConnectionManager::onChannelDeleteAnswer(Utility::ChannelDeleteCode channelDeleteCode)
@@ -178,7 +178,7 @@ void ConnectionManager::onChannelDeleteAnswer(Utility::ChannelDeleteCode channel
         std::cout << "CHANNEL DOES NOT BELONG TO THE USER" << std::endl;
     }
     qRegisterMetaType<Utility::ChannelDeleteCode>("Utility::ChannelDeleteCode");
-    emit ReceiverManager::instance()->onChannelDeleteAnswer(channelDeleteCode);
+    emit ReceiverManager::instance() -> onChannelDeleteAnswer(channelDeleteCode);
 }
 
 void ConnectionManager::onChannelCreateAnswer(Utility::ChannelCreateCodes channelCreateCode)
@@ -196,7 +196,7 @@ void ConnectionManager::onChannelCreateAnswer(Utility::ChannelCreateCodes channe
         std::cout << "CHANNEL ALREADY CREATE" << std::endl;
     }
     qRegisterMetaType<Utility::ChannelCreateCodes>("Utility::ChannelCreateCodes");
-    emit ReceiverManager::instance()->onChannelCreateAnswer(channelCreateCode);
+    emit ReceiverManager::instance() -> onChannelCreateAnswer(channelCreateCode);
 }
 
 void ConnectionManager::onDirectMessageCreateAnswer(Utility::DirectMessageStatus directMessageCreateAnswer)
@@ -210,12 +210,12 @@ void ConnectionManager::onDirectMessageCreateAnswer(Utility::DirectMessageStatus
         std::cout << "FAILED CREATING" << std::endl;
     }
     qRegisterMetaType<Utility::DirectMessageStatus>("Utility::DirectMessageStatus");
-    emit ReceiverManager::instance()->onDirectMessageCreateAnswer(directMessageCreateAnswer);
+    emit ReceiverManager::instance() -> onDirectMessageCreateAnswer(directMessageCreateAnswer);
 }
 
 void ConnectionManager::onDisconnect()
 {
     disconnectFromServer();
     loginState = LoginState::FAILED;
-    emit ReceiverManager::instance()->onDisconnect();
+    emit ReceiverManager::instance() -> onDisconnect();
 }

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Handler.hpp"
 
@@ -343,6 +343,7 @@ public:
                 state = processIncomingMessageBody<Utility::DirectMessageStatus>(buffer, message);
                 break;
             }
+
             default:
                 break;
         }

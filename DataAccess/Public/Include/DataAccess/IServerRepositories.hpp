@@ -25,7 +25,7 @@ struct IMessagesRepository : IMasterRepository
 
     /// Pure Virtual method for editing Message
     virtual Utility::EditingMessageCodes editMessage(const Network::MessageInfo& mi) = 0;
-    
+
     /// Pure Virtual method for updating message reactions
     virtual Utility::ReactionMessageCodes updateMessageReactions(const Network::MessageInfo& mi) = 0;
 
@@ -54,7 +54,7 @@ struct IRepliesRepository : IMasterRepository
 struct IChannelsRepository : IMasterRepository
 {
     /// Virtual method to get channel List
-    virtual std::vector<Network::ChannelInfo> getAllChannelsList()                              = 0;
+    virtual std::vector<Network::ChannelInfo> getAllChannelsList() = 0;
     /// Virtual method to delete channel
     virtual Utility::ChannelDeleteCode deleteChannel(const Network::ChannelDeleteInfo& channel) = 0;
 
@@ -62,7 +62,7 @@ struct IChannelsRepository : IMasterRepository
     virtual Utility::ChannelCreateCodes createChannel(const Network::ChannelInfo& channel) = 0;
 
     /// Virtual method to leave channel
-    virtual Utility::ChannelLeaveCodes leaveChannel(const Network::ChannelLeaveInfo& channel)                    = 0;
+    virtual Utility::ChannelLeaveCodes leaveChannel(const Network::ChannelLeaveInfo& channel) = 0;
     /// Virtual method for channel subscription
     virtual Utility::ChannelSubscribingCodes subscribeToChannel(const Network::ChannelSubscriptionInfo& channel) = 0;
     /// Virtual method to get list of subscribed channels

@@ -40,6 +40,8 @@ public:
     MessageWidget(QWidget* history, QString message, uint64_t userId, uint64_t messageId, qint64 utc, QString username,
                   const Style::MessageWidget& st = st::defaultMessageWidget);
 
+    virtual ~MessageWidget() = default;
+
     /**
      * @brief Method for method for changing the message.
      * @param new text message as string of QString.
@@ -69,7 +71,7 @@ public:
     }
 
     /// Possible height of message widget
-    int expectedHeight() const;
+    virtual int expectedHeight() const;
 
     /// Message DB
     bool isTheMessage(uint64_t messageId, uint64_t userId) const { return messageId == _messageId && userId == _userId; }
@@ -111,7 +113,7 @@ protected:
 private:
     void clearMessage();
 
-private:
+protected:
     std::unique_ptr<FlatTextEdit>   _fmtMessageText;
     std::unique_ptr<FlatButton>     _menuBtn;
     std::unique_ptr<FlatButton>     _reactionsBtn;

@@ -14,7 +14,7 @@ protected:
 struct ChannelsRepository final : IChannelsRepository, AbstractPostgreRepository
 {
     explicit ChannelsRepository(const std::shared_ptr<IAdapter>& adapter) { pTable = std::make_unique<PostgreTable>("users", adapter); }
-    
+
     std::vector<Network::ChannelInfo> getAllChannelsList() final;
     Utility::ChannelLeaveCodes        leaveChannel(const Network::ChannelLeaveInfo& channel) final;
     Utility::ChannelSubscribingCodes  subscribeToChannel(const Network::ChannelSubscriptionInfo& channel) final;
@@ -60,6 +60,7 @@ struct MessagesRepository final : IMessagesRepository, AbstractPostgreRepository
 private:
     std::optional<pqxx::result> insertMessageIntoMessagesTable(const Network::MessageInfo& msi);
     std::optional<pqxx::result> insertIDsIntoChannelMessagesTable(const std::uint64_t channelID, const std::uint64_t messageID);
+    std::optional<pqxx::result> insertContentIntoConentsTable(const Network::MessageInfo& msi, const std::uint64_t messageID);
     std::optional<pqxx::result> insertIDIntoMessageReactionsTable(const std::uint64_t messageID);
 };
 
@@ -71,7 +72,6 @@ struct RegisterRepository final : IRegisterRepository, AbstractPostgreRepository
 
     ~RegisterRepository() final = default;
 };
-
 
 struct RepliesRepository final : IRepliesRepository, AbstractPostgreRepository
 {
@@ -86,4 +86,5 @@ private:
     std::optional<pqxx::result> insertIDsIntoChannelRepliesTable(const std::uint64_t channelID, const std::uint64_t replyID);
     std::optional<pqxx::result> insertReplyIntoRepliesTable(const Network::ReplyInfo& rsi);
 };
+
 }  // namespace DataAccess

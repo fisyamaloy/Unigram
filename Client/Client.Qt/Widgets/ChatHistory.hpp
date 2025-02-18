@@ -6,6 +6,7 @@
 
 #include "MessageWidget.hpp"
 #include "ReplyMessageWidget.hpp"
+#include "VoiceMessageWidget.hpp"
 #include "ScrollArea.hpp"
 
 /**

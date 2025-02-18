@@ -64,6 +64,7 @@ namespace internal
 {
 namespace
 {
+int  px1   = 1;
 int  px8   = 8;
 int  px9   = 9;
 int  px15  = 15;
@@ -78,6 +79,7 @@ int  px600 = 600;
 int  px800 = 800;
 void initPxValues(int scale)
 {
+    px1   = ConvertScale(1, scale);
     px8   = ConvertScale(8, scale);
     px9   = ConvertScale(9, scale);
     px15  = ConvertScale(15, scale);
@@ -111,7 +113,7 @@ void init_StyleBasic(int scale)
     _defaultMargins       = {px8, px8, px8, px8};
     _minWidth             = px800;
     _minHeight            = px600;
-    _shadowPadding        = px9;
+    _shadowPadding        = px1;
     _titleBarHeight       = px30;
     _titleBarMaxIconWidth = px20;
     _authBlockWidth       = px500;

@@ -239,6 +239,9 @@ extern const Style::IconButton& defaultIconButton;
 extern const Style::IconButton& reactionIconButtonInMenu;
 /// reactionIconButton: Style::IconButton
 extern const Style::IconButton& reactionIconButton;
+/// reactionIconButton: Style::IconButton
+extern const Style::IconButton& recordingAudioIconButton;
+extern const Style::IconButton& playAudioIconButton;
 /// userReactionIconButton: Style::IconButton
 extern const Style::IconButton& userReactionIconButton;
 /// defaultLinkButton: Style::LinkButton
