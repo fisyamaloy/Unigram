@@ -1,9 +1,10 @@
 #include "Client.hpp"
 
-#include <limits>
-
 #include <Crypto.Static/Cryptography.hpp>
 #include <Network/Primitives.hpp>
+#include <filesystem>
+#include <fstream>
+#include <limits>
 
 #include "ServerInfo.hpp"
 
@@ -143,16 +144,35 @@ void Client::askForReplyHistory(uint64_t channelID) const
     send(message);
 }
 
-void Client::storeMessage(const std::string& message, const uint64_t channelID) const
+void Client::storeTextMessage(const std::string& message, const uint64_t channelID) const
 {
     Network::Message networkMessage;
     networkMessage.mHeader.mMessageType = MessageType::MessageStoreRequest;
 
     Network::MessageInfo mi;
-    mi.message   = message;
+    mi.setContent(message);
     mi.channelID = channelID;
 
     networkMessage.mBody = std::make_any<Network::MessageInfo>(mi);
+    send(networkMessage);
+}
+
+void Client::storeVoiceMessage(const std::filesystem::path& filepath, const uint64_t channelID, const std::uint16_t duration) const
+{
+    std::ifstream mp3File(filepath.c_str(), std::ios::binary);
+    if (!mp3File)
+    {
+        std::cerr << "Error: unable to open: " << filepath << '\n';
+        return;
+    }
+    std::vector<uint8_t> buffer(std::istreambuf_iterator<char>(mp3File), {});
+    mp3File.close();
+
+    Network::MessageInfo mi(channelID, filepath.filename().string(), buffer, duration, Network::MessageInfoType::AUDIO);
+
+    Network::Message networkMessage;
+    networkMessage.mHeader.mMessageType = Network::MessageType::MessageStoreRequest;
+    networkMessage.mBody                = std::make_any<Network::MessageInfo>(mi);
     send(networkMessage);
 }
 
@@ -214,10 +234,11 @@ void Client::userMessageDelete(const uint64_t messageID) const
     send(message);
 }
 
+// TODO:: Send id!!!
 void Client::userMessageDelete(const std::string& messageText) const
 {
     Network::MessageInfo mi;
-    mi.message = messageText;
+    mi.setContent(messageText);
 
     Network::Message message;
     message.mHeader.mMessageType = MessageType::MessageDeleteRequest;
@@ -274,7 +295,7 @@ void Client::userMessageReaction(const std::uint64_t messageID, const std::uint3
 
     // using max uint32_t as special value
     mi.reactions[reactionID] = std::numeric_limits<std::uint32_t>::max();
-    
+
     Network::Message message;
     message.mHeader.mMessageType = MessageType::MessageReactionRequest;
     message.mBody                = std::make_any<Network::MessageInfo>(mi);
@@ -401,7 +422,7 @@ void Client::loop()
                 onChannelCreateAnswer(channelCreateCode);
             }
             break;
-            
+
             case MessageType::MessageReactionAnswer:
             {
                 auto messageInfo = std::any_cast<Utility::ReactionMessageCodes>(message.mBody);

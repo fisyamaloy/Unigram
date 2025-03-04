@@ -58,7 +58,7 @@ int main(int argc, char** argv)
                 Network::Message message;                                  
 
                 Network::MessageInfo msg;
-                msg.message   = "123";
+                msg.setContent(std::string("123"));
                 message.mBody = std::any_cast<Network::MessageInfo>(msg);
 
                 clientApp.send(message);
@@ -69,7 +69,7 @@ int main(int argc, char** argv)
                 Network::Message message;
 
                 Network::MessageInfo msg;
-                msg.message   = "123";
+                msg.setContent(std::string("123"));
                 message.mBody = std::any_cast<Network::MessageInfo>(msg);
 
                 clientApp.send(message);
@@ -88,7 +88,7 @@ int main(int argc, char** argv)
                 std::string text      = GetLineFromCin();
                 uint64_t    channelID = 1;
 
-                clientApp.storeMessage(text, channelID);
+                clientApp.storeTextMessage(text, channelID);
             }
             else if (cmd == "dm")
             {

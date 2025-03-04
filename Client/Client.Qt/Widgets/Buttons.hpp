@@ -1,5 +1,7 @@
-#pragma once
+﻿#pragma once
 
+#include <QAudioOutput>
+#include <QMediaPlayer>
 #include <Style/Styles.hpp>
 
 #include "AbstractButton.hpp"
@@ -132,4 +134,21 @@ private:
 
     const Style::icon*       _iconOverride = nullptr;
     const Style::IconButton& _st;
+};
+
+class AudioButton : public IconButton
+{
+    Q_OBJECT
+
+public:
+    explicit AudioButton(const QString& audioFilePath, QWidget* parent = nullptr);
+
+public slots:
+    void audioButtonClick();
+
+    void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
+
+private:
+    std::unique_ptr<QMediaPlayer> _player;
+    std::unique_ptr<QAudioOutput> _audioOutput;
 };

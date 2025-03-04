@@ -66,7 +66,8 @@ set(UI_WIDGETS_SOURCES
         Widgets/TextEdit.cpp
         Widgets/TextEdit.hpp
         Widgets/TitleWidget.cpp
-        Widgets/TitleWidget.hpp)
+        Widgets/TitleWidget.hpp 
+        Widgets/VoiceMessageWidget.cpp)
 
 set(PAGES_SOURCES
         Pages/ChannelCreationPage.cpp
@@ -117,10 +118,12 @@ add_executable(${TARGET} ${SOURCE_FILES} ${STYLE_SOURCES} ${UI_WIDGETS_SOURCES} 
         resources/resources.qrc)
 
 find_package(Qt6 COMPONENTS Widgets REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS Multimedia)
 find_package(Boost CONFIG REQUIRED COMPONENTS asio)
+find_package(mp3lame CONFIG REQUIRED)
 
 target_link_libraries(${TARGET}
-        PRIVATE Qt6::Widgets Qt::Gui ${EXTRA_LIBS} Boost::asio
+        PRIVATE Qt6::Widgets Qt::Gui Qt6::Multimedia ${EXTRA_LIBS} Boost::asio mp3lame::mp3lame
         PUBLIC Network.Public Client.Core.Static Utility.Public)
 
 target_precompile_headers(${TARGET} INTERFACE QtWidgets.h)

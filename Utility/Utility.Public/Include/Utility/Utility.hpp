@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <chrono>
 #include <ctime>
 #include <mutex>
 #include <string>
@@ -121,12 +122,24 @@ enum class DirectMessageStatus : std::uint8_t
     FAILED,
 };
 
+enum class MessageStatus : std::uint8_t
+{
+    SUCCESS,
+    FAILED,
+};
+
 /**
  * @brief enum for tracking message's reaction status
  * @details Utility::ReactionMessageCodes updateMessageReactions(const Network::MessageInfo& mi) /
  *    returns one of these codes.
  */
 enum class ReactionMessageCodes : std::uint8_t
+{
+    SUCCESS,
+    FAILED
+};
+
+enum class VoiceMessageCodes : std::uint8_t
 {
     SUCCESS,
     FAILED
@@ -223,7 +236,8 @@ inline std::string removeSpaces(const std::string& input)
  */
 inline std::int64_t millisecondsSinceEpoch()
 {
-    return static_cast<std::int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+    return static_cast<std::int64_t>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 }
 
 }  // namespace Utility

@@ -1,4 +1,4 @@
-#include "Buttons.hpp"
+﻿#include "Buttons.hpp"
 
 #include <QDebug>
 #include <QPainter>
@@ -124,4 +124,40 @@ void IconButton::setIcon(const Style::icon* icon)
 {
     _iconOverride = icon;
     updateWidget();
+}
+
+AudioButton::AudioButton(const QString& audioFilePath, QWidget* parent) : IconButton(parent, "", st::playAudioIconButton)
+{
+    _audioOutput = std::make_unique<QAudioOutput>(this);
+    _player      = std::make_unique<QMediaPlayer>(this);
+
+    _player->setAudioOutput(_audioOutput.get());
+    _player->setSource(QUrl::fromLocalFile(audioFilePath));
+
+    setClickCallback([&]() { audioButtonClick(); });
+    connect(_player.get(), &QMediaPlayer::mediaStatusChanged, this, &AudioButton::onMediaStatusChanged);
+}
+
+void AudioButton::audioButtonClick()
+{
+    if (_player->playbackState() == QMediaPlayer::PlayingState)
+    {
+        setIcon(&st::playingVoiceMessageIcon);
+        _player->pause();
+    }
+    else
+    {
+        setIcon(&st::pausedVoiceMessageIcon);
+        _player->play();
+    }
+}
+
+void AudioButton::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
+{
+    if (status == QMediaPlayer::EndOfMedia)
+    {
+        setIcon(&st::playingVoiceMessageIcon);
+    }
+
+    update();
 }

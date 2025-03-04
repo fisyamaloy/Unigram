@@ -21,6 +21,11 @@ Style::icon _likeIcon    = {Qt::Uninitialized};
 Style::icon _fireIcon    = {Qt::Uninitialized};
 Style::icon _catIcon     = {Qt::Uninitialized};
 
+Style::icon _activeRecordingMicIcon  = {Qt::Uninitialized};
+Style::icon _passiveRecordingMicIcon = {Qt::Uninitialized};
+Style::icon _playingVoiceMessageIcon = {Qt::Uninitialized};
+Style::icon _pausedVoiceMessageIcon  = {Qt::Uninitialized};
+
 }  // namespace
 
 namespace st
@@ -30,6 +35,11 @@ const Style::icon& dislikeIcon(_dislikeIcon);
 const Style::icon& likeIcon(_likeIcon);
 const Style::icon& fireIcon(_fireIcon);
 const Style::icon& catIcon(_catIcon);
+
+const Style::icon& activeRecordingMicIcon(_activeRecordingMicIcon);
+const Style::icon& passiveRecordingMicIcon(_passiveRecordingMicIcon);
+const Style::icon& playingVoiceMessageIcon(_playingVoiceMessageIcon);
+const Style::icon& pausedVoiceMessageIcon(_pausedVoiceMessageIcon);
 }  // namespace st
 
 namespace Style
@@ -50,6 +60,11 @@ void init_StyleIcons(int)
     _likeIcon    = {":reactions/like.png", 1};
     _fireIcon    = {":reactions/fire.png", 1};
     _catIcon     = {":reactions/cat.png", 1};
+
+    _passiveRecordingMicIcon = {":icons/mic-w-300.png", 1};
+    _activeRecordingMicIcon  = {":icons/mic-wr-300.png", 1};
+    _playingVoiceMessageIcon = {":icons/play_sound-w-300.png", 1};
+    _pausedVoiceMessageIcon  = {":icons/pause_sound-w-300.png", 1};
 }
 
 }  // namespace internal
