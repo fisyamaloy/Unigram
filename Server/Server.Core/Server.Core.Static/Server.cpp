@@ -288,7 +288,7 @@ void Server::onMessage(const std::shared_ptr<Connection>& client, Message& messa
             }
             else
             {
-                client->disconnect();
+                //client->disconnect();
             }
         }
         break;

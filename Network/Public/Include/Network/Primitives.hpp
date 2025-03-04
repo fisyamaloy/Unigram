@@ -186,7 +186,7 @@ struct VoiceMessage
 {
     std::string          fileName;
     std::uint16_t        durationSeconds;
-    std::vector<uint8_t> data;
+    std::vector<uint8_t> data = {};
 
     template <typename Archive>
     void serialize(Archive& ar)
@@ -276,7 +276,7 @@ struct MessageInfo
     {
         if constexpr (std::is_same_v<T, std::string>)
         {
-            content = std::move(TextMessage{newContent});
+            content = TextMessage{newContent};
             type    = MessageInfoType::TEXT;
         }
         else if constexpr (std::is_same_v<T, VoiceMessage>)
