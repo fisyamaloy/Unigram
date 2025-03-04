@@ -5,6 +5,7 @@
 
 #include "DataAccess.Postgre/PostgreRepositoryManager.hpp"
 #include "Network/Primitives.hpp"
+#include "Utility/Utility.hpp"
 
 using Network::Connection;
 using Network::Message;
@@ -144,7 +145,7 @@ void Server::onMessage(const std::shared_ptr<Connection>& client, Message& messa
             }
             else if (mi.type == Network::MessageInfoType::AUDIO)
             {
-                auto& voiceInfo = mi.getContent<Network::VoiceMessage>();
+                auto&         voiceInfo = mi.getContent<Network::VoiceMessage>();
                 std::ofstream out(voiceInfo.fileName, std::ios_base::binary);
                 if (out)
                 {
@@ -288,7 +289,7 @@ void Server::onMessage(const std::shared_ptr<Connection>& client, Message& messa
             }
             else
             {
-                //client->disconnect();
+                // client->disconnect();
             }
         }
         break;
@@ -393,7 +394,7 @@ void Server::onMessage(const std::shared_ptr<Connection>& client, Message& messa
             client->send(messageToClient);
         }
         break;
-        
+
         default:
         {
             std::cerr << "Unknown command received\n";

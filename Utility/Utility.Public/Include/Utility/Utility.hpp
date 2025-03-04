@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <chrono>
 #include <ctime>
 #include <mutex>
 #include <string>
@@ -235,7 +236,8 @@ inline std::string removeSpaces(const std::string& input)
  */
 inline std::int64_t millisecondsSinceEpoch()
 {
-    return static_cast<std::int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+    return static_cast<std::int64_t>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 }
 
 }  // namespace Utility
