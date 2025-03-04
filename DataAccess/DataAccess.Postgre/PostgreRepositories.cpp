@@ -172,11 +172,11 @@ std::vector<Network::MessageInfo> MessagesRepository::getMessageHistory(const st
                     break;
                 case Network::MessageInfoType::AUDIO:
                     assert(!durationRef.is_null());
-                    mi.setContent(Network::VoiceMessage{contentRef.as<std::string>(), durationRef.as<std::uint16_t>()});
+                    mi.setContent(Network::VoiceMessage{contentRef.as<std::string>(), durationRef.as<std::uint16_t>(), {}});
                     break;
                 case Network::MessageInfoType::VIDEO:
                     assert(!durationRef.is_null());
-                    mi.setContent(Network::VideoMessage{contentRef.as<std::string>(), durationRef.as<std::uint16_t>()});
+                    mi.setContent(Network::VideoMessage{contentRef.as<std::string>(), durationRef.as<std::uint16_t>(), {}});
                     break;
                 default:
                     break;
